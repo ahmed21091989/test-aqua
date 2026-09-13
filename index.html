@@ -1123,4 +1123,16 @@
         }
         function exportReportsExcel() { alert('خاصية تصدير التقارير متوفرة عبر طباعة التقرير (PDF/طباعة مباشرة).'); }
         function toggleAdvCustomDate() { let val = document.getElementById('adv-date-filter').value; document.getElementById('adv-custom-date-row').style.display = (val === 'custom') ? 'grid' : 'none'; }
-        function updateAdvSubReports() { let type = document.getElementById('adv-type-filter').value; let subtype = document.getElementById('adv-subtype-filter'); if(type === 'sales') { subtype.innerHTML = `<option value="summary">
+        function updateAdvSubReports() { let type = document.getElementById('adv-type-filter').value; let subtype = document.getElementById('adv-subtype-filter'); if(type === 'sales') { subtype.innerHTML = `<option value="summary"><script>
+  function handleLogin(event) {
+    event.preventDefault();
+    const usernameInput = document.getElementById('login-username').value;
+    const passwordInput = document.getElementById('login-password').value;
+    if (usernameInput === 'admin' && passwordInput === '1234') {
+      alert('تم تسجيل الدخول بنجاح!');
+      location.reload();
+    } else {
+      alert('اسم المستخدم أو كلمة المرور غير صحيحة');
+    }
+  }
+</script>
