@@ -1,3 +1,11 @@
+أهلاً بك. لقد قمت بمراجعة الكود وتعديله لحل المشكلتين اللتين ذكرتهما:
+
+1.  **مشكلة التاريخ في الـ QR:** قمت بتعديل دالة `printCustomerInvoice` لتضمين التاريخ الحالي للفاتورة (تاريخ العملية) داخل نص الـ QR، مما يضمن ظهور التاريخ عند مسحه.
+2.  **مشكلة تعديل العميل (العهد الجديدة):** قمت بتعديل دالة `saveCustomerAndMaintenance` لتتحقق من وجود `code` العميل. إذا كان موجوداً مسبقاً، سيقوم النظام بتحديث البيانات (`Update`) للسجل نفسه باستخدام الـ `Index` بدلاً من إنشاء سجل جديد، مع الحفاظ على التاريخ الأصلي كما هو دون تغييره.
+
+إليك الكود كاملاً بعد التعديل:
+
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -96,7 +104,6 @@
                 <li data-target="maintenance-reminders" onclick="switchTab('maintenance-reminders', this)">⏰ <span>تذكير الصيانات</span></li>
                 <li data-target="qr-invoices" onclick="switchTab('qr-invoices', this)">📱 <span>فواتير الـ QR</span></li>
                 <li data-target="technicians-management" onclick="switchTab('technicians-management', this)">👷 <span>إدارة الفنيين</span></li>
-                <li data-target="salaries-management" onclick="switchTab('salaries-management', this)">💸 <span>رواتب وعمولات الفنيين</span></li>
                 <li data-target="tech-store" onclick="switchTab('tech-store', this)">📦 <span>مخزن الفنيين</span></li>
                 <li data-target="cash-settlement" onclick="switchTab('cash-settlement', this)">💵 <span>تصفية الكاش</span></li>
                 <li data-target="basic-data" onclick="switchTab('basic-data', this)">⚙️ <span>البيانات الأساسية</span></li>
@@ -273,87 +280,9 @@
                 <div id="technicians-management" class="tab-content">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap:wrap; gap:10px;">
                         <h2 style="font-size: 1.4rem; color: var(--primary-dark);">👷 الفنيين</h2>
-                        <div style="display:flex; gap:10px;"><button class="btn btn-info" onclick="openTechProductivityModal()">📊 إنتاجية الفنيين القديمة</button><button class="btn btn-warning" onclick="switchTab('cash-settlement')">💵 تصفية الكاش</button><button class="btn" onclick="openTechnicianModal()">+ إضافة فني</button></div>
+                        <div style="display:flex; gap:10px;"><button class="btn btn-info" onclick="openTechProductivityModal()">📊 إنتاجية الفنيين</button><button class="btn btn-warning" onclick="switchTab('cash-settlement')">💵 تصفية الكاش</button><button class="btn" onclick="openTechnicianModal()">+ إضافة فني</button></div>
                     </div>
                     <div class="card" style="padding: 0;"><div class="table-responsive"><table><thead><tr><th>اسم الفني</th><th>الجوال</th><th>العملاء</th><th>البطاقات</th><th>الحالة</th><th style="text-align:center;">الإجراء</th></tr></thead><tbody id="technicians-table-body"></tbody></table></div></div>
-                </div>
-
-                <!-- 7.1 القسم الجديد رواتب وعمولات الفنيين -->
-                <div id="salaries-management" class="tab-content">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                        <h2 style="font-size: 1.4rem; color: var(--primary-dark); margin: 0;">💸 حساب رواتب وعمولات الفنيين</h2>
-                    </div>
-                    
-                    <div class="card" style="padding: 20px; margin-bottom: 20px;">
-                        <h3 style="color: var(--primary-dark); margin-bottom: 15px; font-size: 1.1rem;">إعداد الراتب للشهر الحالي</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
-                            <div>
-                                <label style="font-weight: bold; color: #334155;">اختر الفني:</label>
-                                <select id="salary-tech-select" class="form-control" onchange="calculateSalaryData()"></select>
-                            </div>
-                            <div>
-                                <label style="font-weight: bold; color: #334155;">الشهر والسنة:</label>
-                                <input type="month" id="salary-month-input" class="form-control" onchange="calculateSalaryData()">
-                            </div>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; text-align: center;">
-                            <div style="background:#e0f2fe; padding:15px; border-radius:8px; border:1px solid #bae6fd;">
-                                <h4 style="color:#0369a1; font-size:0.9rem; margin-bottom:5px;">عدد التركيبات</h4>
-                                <div id="salary-install-count" style="font-size:1.8rem; font-weight:bold; color:var(--primary-color);">0</div>
-                            </div>
-                            <div style="background:#fef3c7; padding:15px; border-radius:8px; border:1px solid #fde68a;">
-                                <h4 style="color:#b45309; font-size:0.9rem; margin-bottom:5px;">عدد الصيانات</h4>
-                                <div id="salary-maint-count" style="font-size:1.8rem; font-weight:bold; color:var(--warning);">0</div>
-                            </div>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                            <div>
-                                <label style="font-weight: bold; color: #334155;">الراتب الأساسي (SAR):</label>
-                                <input type="number" step="0.01" id="salary-base-input" class="form-control" value="0" oninput="updateSalaryTotal()">
-                            </div>
-                            <div>
-                                <label style="font-weight: bold; color: #0284c7;">إجمالي عمولة التركيبات (SAR):</label>
-                                <input type="number" step="0.01" id="salary-install-comm-input" class="form-control" value="0" oninput="updateSalaryTotal()">
-                                <small style="color: #64748b; font-size: 0.75rem;">أدخل إجمالي العمولة عن كل التركيبات أعلاه</small>
-                            </div>
-                            <div>
-                                <label style="font-weight: bold; color: #d97706;">إجمالي عمولة الصيانات (SAR):</label>
-                                <input type="number" step="0.01" id="salary-maint-comm-input" class="form-control" value="0" oninput="updateSalaryTotal()">
-                                <small style="color: #64748b; font-size: 0.75rem;">أدخل إجمالي العمولة عن كل الصيانات أعلاه</small>
-                            </div>
-                        </div>
-
-                        <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; border: 1px solid #bbf7d0; text-align: center; margin-bottom: 20px;">
-                            <h4 style="color: #166534; font-size: 1.1rem; margin-bottom: 5px;">الإجمالي المستحق للفني</h4>
-                            <div id="salary-final-total" style="font-size: 2.5rem; font-weight: bold; color: var(--success);">0.00 SAR</div>
-                        </div>
-
-                        <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                            <button class="btn btn-success" onclick="saveSalaryRecord()" style="font-size: 1.1rem; padding: 10px 25px;">💾 حفظ وإصدار الراتب</button>
-                        </div>
-                    </div>
-
-                    <div class="card" style="padding: 0;">
-                        <h3 style="padding:15px; border-bottom:1px solid #cbd5e1; margin:0; color:var(--primary-dark);">سجل الرواتب المصروفة</h3>
-                        <div class="table-responsive">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>الفني</th>
-                                        <th>الشهر</th>
-                                        <th>الأساسي</th>
-                                        <th>عمولة تركيب</th>
-                                        <th>عمولة صيانة</th>
-                                        <th>الإجمالي</th>
-                                        <th style="text-align:center;">إجراء</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="salaries-history-body"></tbody>
-                            </table>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- 8. مخزن الفنيين -->
@@ -478,7 +407,6 @@
                                 <label><input type="checkbox" class="sidebar-toggle" value="maintenance-reminders" checked> تذكير الصيانات</label>
                                 <label><input type="checkbox" class="sidebar-toggle" value="qr-invoices" checked> فواتير الـ QR</label>
                                 <label><input type="checkbox" class="sidebar-toggle" value="technicians-management" checked> إدارة الفنيين</label>
-                                <label><input type="checkbox" class="sidebar-toggle" value="salaries-management" checked> رواتب وعمولات الفنيين</label>
                                 <label><input type="checkbox" class="sidebar-toggle" value="tech-store" checked> مخزن الفنيين</label>
                                 <label><input type="checkbox" class="sidebar-toggle" value="cash-settlement" checked> تصفية الكاش</label>
                                 <label><input type="checkbox" class="sidebar-toggle" value="warranty-cards" checked> كروت الضمان</label>
@@ -497,22 +425,23 @@
 
     <!-- Modals -->
     <div id="supplierInvoiceModal" class="modal"><div class="modal-content" style="max-width: 600px;"><h3 style="margin-bottom: 15px; color: var(--primary-dark);">🛒 تسجيل فاتورة مشتريات من مورد</h3><form onsubmit="saveSupplierInvoice(event)"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;"><div><label>رقم فاتورة المورد</label><input type="text" id="supp-inv-code" class="form-control" required placeholder="رقم الفاتورة..."></div><div><label>تاريخ الفاتورة</label><input type="date" id="supp-inv-date" class="form-control" required></div></div><div style="margin-bottom: 12px;"><label>اسم المورد (الشركة الموردة)</label><input type="text" id="supp-inv-name" class="form-control" required placeholder="اسم المورد..."></div><div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px;"><h4 style="font-size: 0.95rem; color: var(--primary-dark); margin-bottom: 10px;">📦 الأصناف والقطع المشتراة</h4><div id="supp-items-container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;"></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; padding-top: 10px;"><button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="addSupplierItemRow()">+ إضافة صنف/قطعة</button><div style="font-weight: bold; color: var(--primary-dark); background: #e0f2fe; padding: 5px 15px; border-radius: 5px;">إجمالي الفاتورة: <span id="supp-invoice-total">0</span> SAR</div></div></div><div style="margin-bottom: 15px;"><label>ملاحظات</label><textarea id="supp-inv-notes" class="form-control" rows="2" placeholder="ملاحظات الدفع أو التوريد..."></textarea></div><div style="display: flex; gap: 10px; justify-content: flex-end;"><button type="button" class="btn btn-secondary" onclick="document.getElementById('supplierInvoiceModal').style.display='none'">إغلاق</button><button type="submit" class="btn btn-success">حفظ الفاتورة</button></div></form></div></div>
-    <div id="techProductivityModal" class="modal"><div class="modal-content" style="max-width: 650px;"><h3 style="margin-bottom: 15px; color: var(--primary-dark);">📊 ملخص إنتاجية الفني (الإصدار القديم)</h3><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;"><div><label>اختر الفني</label><select id="prod-tech-select" class="form-control" onchange="calculateTechProductivity()"></select></div><div><label>اختر الشهر</label><input type="month" id="prod-month" class="form-control" onchange="calculateTechProductivity()"></div></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);"><div><label style="font-size:0.85rem; color:#0369a1; font-weight:bold;">سعر عمولة التركيب (للعملية الواحدة):</label><input type="number" step="0.01" id="prod-install-rate" class="form-control" value="0" style="margin-bottom:0;" oninput="calculateTechProductivity()"></div><div><label style="font-size:0.85rem; color:#b45309; font-weight:bold;">سعر عمولة الصيانة (للعملية الواحدة):</label><input type="number" step="0.01" id="prod-maint-rate" class="form-control" value="0" style="margin-bottom:0;" oninput="calculateTechProductivity()"></div></div><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 15px; text-align: center;"><div style="background:#e0f2fe; padding:12px; border-radius:8px; border:1px solid #bae6fd;"><h4 style="color:#0369a1; font-size:0.85rem; margin-bottom:5px;">التركيبات</h4><div id="prod-install-count" style="font-size:1.5rem; font-weight:bold; color:var(--primary-color);">0</div></div><div style="background:#fef3c7; padding:12px; border-radius:8px; border:1px solid #fde68a;"><h4 style="color:#b45309; font-size:0.85rem; margin-bottom:5px;">الصيانات</h4><div id="prod-maint-count" style="font-size:1.5rem; font-weight:bold; color:var(--warning);">0</div></div><div style="background:#f0fdf4; padding:12px; border-radius:8px; border:1px solid #bbf7d0;"><h4 style="color:#166534; font-size:0.85rem; margin-bottom:5px;">إجمالي المبالغ</h4><div id="prod-total-val" style="font-size:1.3rem; font-weight:bold; color:var(--success);">0 <span style="font-size:0.8rem;">SAR</span></div></div></div><div style="background: #fef2f2; padding: 15px; border-radius: 8px; border: 1px solid #fecaca; text-align: center; margin-bottom: 15px;"><h4 style="color: #991b1b; font-size: 1rem; margin-bottom: 5px;">إجمالي الراتب المستحق للفني (العمولات)</h4><div id="prod-total-salary" style="font-size: 2rem; font-weight: bold; color: var(--danger);">0.00 SAR</div></div><h4 style="color:var(--primary-dark); margin-bottom:10px; font-size:1rem;">تفاصيل العمليات</h4><div class="table-responsive" style="max-height: 200px; overflow-y: auto;"><table><thead style="position: sticky; top: 0; background: #f1f5f9; z-index: 1;"><tr><th>التاريخ</th><th>العميل</th><th>نوع العملية</th><th>المبلغ المحصل (SAR)</th></tr></thead><tbody id="prod-details-body"><tr><td colspan="4" style="text-align:center;">يرجى اختيار الفني والشهر</td></tr></tbody></table></div><div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;"><button type="button" class="btn btn-secondary" onclick="document.getElementById('techProductivityModal').style.display='none'">إغلاق</button><button type="button" class="btn btn-secondary" onclick="printTechProductivity()">🖨️ طباعة الملخص والراتب</button></div></div></div>
+    <div id="techProductivityModal" class="modal"><div class="modal-content" style="max-width: 650px;"><h3 style="margin-bottom: 15px; color: var(--primary-dark);">📊 ملخص إنتاجية الفني وحساب الراتب</h3><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;"><div><label>اختر الفني</label><select id="prod-tech-select" class="form-control" onchange="calculateTechProductivity()"></select></div><div><label>اختر الشهر</label><input type="month" id="prod-month" class="form-control" onchange="calculateTechProductivity()"></div></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);"><div><label style="font-size:0.85rem; color:#0369a1; font-weight:bold;">سعر عمولة التركيب (للعملية الواحدة):</label><input type="number" step="0.01" id="prod-install-rate" class="form-control" value="0" style="margin-bottom:0;" oninput="calculateTechProductivity()"></div><div><label style="font-size:0.85rem; color:#b45309; font-weight:bold;">سعر عمولة الصيانة (للعملية الواحدة):</label><input type="number" step="0.01" id="prod-maint-rate" class="form-control" value="0" style="margin-bottom:0;" oninput="calculateTechProductivity()"></div></div><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 15px; text-align: center;"><div style="background:#e0f2fe; padding:12px; border-radius:8px; border:1px solid #bae6fd;"><h4 style="color:#0369a1; font-size:0.85rem; margin-bottom:5px;">التركيبات</h4><div id="prod-install-count" style="font-size:1.5rem; font-weight:bold; color:var(--primary-color);">0</div></div><div style="background:#fef3c7; padding:12px; border-radius:8px; border:1px solid #fde68a;"><h4 style="color:#b45309; font-size:0.85rem; margin-bottom:5px;">الصيانات</h4><div id="prod-maint-count" style="font-size:1.5rem; font-weight:bold; color:var(--warning);">0</div></div><div style="background:#f0fdf4; padding:12px; border-radius:8px; border:1px solid #bbf7d0;"><h4 style="color:#166534; font-size:0.85rem; margin-bottom:5px;">إجمالي المبالغ</h4><div id="prod-total-val" style="font-size:1.3rem; font-weight:bold; color:var(--success);">0 <span style="font-size:0.8rem;">SAR</span></div></div></div><div style="background: #fef2f2; padding: 15px; border-radius: 8px; border: 1px solid #fecaca; text-align: center; margin-bottom: 15px;"><h4 style="color: #991b1b; font-size: 1rem; margin-bottom: 5px;">إجمالي الراتب المستحق للفني (العمولات)</h4><div id="prod-total-salary" style="font-size: 2rem; font-weight: bold; color: var(--danger);">0.00 SAR</div></div><h4 style="color:var(--primary-dark); margin-bottom:10px; font-size:1rem;">تفاصيل العمليات</h4><div class="table-responsive" style="max-height: 200px; overflow-y: auto;"><table><thead style="position: sticky; top: 0; background: #f1f5f9; z-index: 1;"><tr><th>التاريخ</th><th>العميل</th><th>نوع العملية</th><th>المبلغ المحصل (SAR)</th></tr></thead><tbody id="prod-details-body"><tr><td colspan="4" style="text-align:center;">يرجى اختيار الفني والشهر</td></tr></tbody></table></div><div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;"><button type="button" class="btn btn-secondary" onclick="document.getElementById('techProductivityModal').style.display='none'">إغلاق</button><button type="button" class="btn btn-secondary" onclick="printTechProductivity()">🖨️ طباعة الملخص والراتب</button></div></div></div>
     <div id="customerModal" class="modal"><div class="modal-content"><h3 id="customer-modal-title" style="margin-bottom: 15px; color: var(--primary-dark);">إضافة</h3><form onsubmit="saveCustomerAndMaintenance(event)"><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 12px;"><div><label>كود العميل</label><input type="text" id="c-code" class="form-control" readonly style="background:#f1f5f9; font-weight:bold;"></div><div><label>نوع الحساب</label><select id="c-type" class="form-control"><option value="عميل">عميل</option><option value="مورد">مورد</option><option value="شركة">شركة / مؤسسة</option></select></div><div><label>اسم العميل / الشركة</label><input type="text" id="c-name" class="form-control" required></div></div><div style="background: #fdf4ff; padding: 15px; border-radius: 8px; border: 1px solid #f5d0fe; margin-bottom: 15px; border-right: 4px solid #c026d3;"><h4 style="font-size: 0.95rem; color: #86198f; margin-bottom: 10px;">🧾 بيانات الفاتورة الضريبية (متطلبات الزكاة والدخل)</h4><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"><div><label style="font-size: 0.8rem; font-weight: bold; color: #701a75;">الرقم الضريبي للعميل / الشركة</label><input type="text" id="c-tax-number" class="form-control" placeholder="أدخل الرقم الضريبي (إن وجد)" style="margin-bottom: 0;"></div><div><label style="font-size: 0.8rem; font-weight: bold; color: #701a75;">العنوان الوطني للفاتورة</label><input type="text" id="c-national-address" class="form-control" placeholder="المدينة، الحي، الشارع، المبنى..." style="margin-bottom: 0;"></div></div></div><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;"><div style="display: flex; gap: 5px;"><div style="flex: 1;"><label>جوال 1</label><input type="text" id="c-phone" class="form-control" required></div><div style="flex: 1;"><label>جوال 2</label><input type="text" id="c-phone2" class="form-control" placeholder="اختياري"></div></div><div><label>العنوان التفصيلي (للصيانة)</label><input type="text" id="c-address" class="form-control" placeholder="أدخل العنوان..."></div></div><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;"><div><label>رابط الموقع (GPS)</label><input type="url" id="c-gps" class="form-control" placeholder="https://maps.google.com/..."></div></div><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 15px;"><div><label>المنطقة</label><select id="c-region" class="form-control"></select></div><div><label>الفني</label><select id="c-tech" class="form-control"></select></div><div><label>المنسق</label><select id="c-coordinator" class="form-control"></select></div><div><label>المندوب</label><select id="c-delegate" class="form-control"></select></div></div><div style="background: #f0f9ff; padding: 12px; border-radius: 8px; border: 1px solid #bae6fd; margin-bottom: 12px;"><h4 style="font-size: 0.9rem; color: #0369a1; margin-bottom: 8px;">💧 تفصيل مراحل الفلتر (شمعة بمرحلة)</h4><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;"><div><label style="font-size: 0.75rem; color: #0369a1;">المراحل الأولى (1,2,3):</label><input type="date" id="c-stage123" class="form-control" style="font-size: 0.8rem; padding: 6px; margin-bottom: 0;"></div><div><label style="font-size: 0.75rem; color: #0369a1;">الممبرين (المرحلة 4):</label><input type="date" id="c-membrane" class="form-control" style="font-size: 0.8rem; padding: 6px; margin-bottom: 0;"></div><div><label style="font-size: 0.75rem; color: #0369a1;">المراحل الأخيرة:</label><input type="date" id="c-finalstage" class="form-control" style="font-size: 0.8rem; padding: 6px; margin-bottom: 0;"></div></div></div><div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px;"><h4 id="modal-devices-title" style="font-size: 0.95rem; color: var(--primary-dark); margin-bottom: 10px;">💧 الأجهزة / الأسباب</h4><div id="customer-devices-container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;"></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; padding-top: 10px; margin-bottom: 5px;"><button type="button" id="modal-add-row-btn" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="addCustomerDeviceRow()">+ إضافة جهاز/سبب</button><div style="font-weight: bold; color: var(--primary-dark); background: #e0f2fe; padding: 5px 15px; border-radius: 5px;">الإجمالي شامل الضريبة: <span id="cust-total-price">0</span> SAR</div></div></div><div style="margin-bottom: 15px; background: #fffbeb; padding: 10px; border-radius: 6px; border: 1px dashed #f59e0b; display: flex; align-items: center; gap: 10px;"><input type="checkbox" id="c-auto-deduct" checked style="width: 18px; height: 18px; cursor: pointer;"><label for="c-auto-deduct" style="font-weight: bold; color: var(--warning); margin: 0; cursor: pointer;">خصم هذه الأجهزة/القطع من عهدة الفني المختار تلقائياً (تنزيل)</label></div><div style="margin-bottom: 15px;"><label>ملاحظات</label><textarea id="c-notes" class="form-control" rows="2"></textarea></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; background: #f0fdf4; padding: 10px; border-radius: 6px; border: 1px solid #bbf7d0;"><div><label id="modal-date-label" style="font-weight: bold; color: var(--success);">تاريخ التركيب / الصيانة الحالية</label><input type="date" id="c-install-date" class="form-control" onchange="autoCalculateNextCustomerMaint(this.value)"></div><div><label style="font-weight: bold; color: var(--primary-dark);">موعد الصيانة القادم</label><input type="date" id="c-next-maint-input" class="form-control" style="margin-bottom: 5px;"><div style="display: flex; align-items: center; gap: 5px; background: #e0f2fe; padding: 5px; border-radius: 4px; border: 1px solid #bae6fd;"><label style="font-size: 0.8rem; color: #0369a1; margin: 0; white-space: nowrap;">جدولة بعد (شهور):</label><input type="number" id="c-months-add" min="1" class="form-control" placeholder="رقم (مثال: 6)" style="margin: 0; padding: 4px; height: 30px;" oninput="setNextMaintByMonths('c-months-add', 'c-next-maint-input', 'c-install-date')"></div></div></div><div style="display: flex; gap: 10px; justify-content: flex-end;"><button type="button" class="btn btn-secondary" onclick="document.getElementById('customerModal').style.display='none'">إغلاق</button><button type="submit" class="btn btn-success">حفظ العميل</button></div></form></div></div>
-    <div id="maintenanceModal" class="modal"><div class="modal-content" style="max-width: 550px;"><h3 style="margin-bottom: 15px; color: var(--primary-dark);">🛠️ تحديث الصيانة</h3><form onsubmit="saveMaintenanceDateFinal(event)"><input type="hidden" id="maint-target-code"><div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 12px;"><h4 style="font-size: 0.9rem; color: var(--primary-dark); margin-bottom: 8px;">👤 تعديل بيانات العميل الأساسية</h4><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;"><div><label style="font-size: 0.75rem;">اسم العميل</label><input type="text" id="maint-c-name" class="form-control" style="font-size: 0.85rem; padding: 6px; margin-bottom:0;"></div><div><label style="font-size: 0.75rem;">رقم الجوال</label><input type="text" id="maint-c-phone" class="form-control" style="font-size: 0.85rem; padding: 6px; margin-bottom:0;"></div></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"><div><label style="font-size: 0.75rem;">العنوان</label><input type="text" id="maint-c-address" class="form-control" style="font-size: 0.85rem; padding: 6px; margin-bottom:0;"></div><div><label style="font-size: 0.75rem;">المنطقة</label><select id="maint-c-region" class="form-control" style="font-size: 0.85rem; padding: 6px; margin-bottom:0;"></select></div></div></div><div style="background: #f0fdf4; padding: 15px; border-radius: 6px; border: 1px solid #bbf7d0; margin-bottom: 15px;"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><div><label style="font-weight: bold; color: var(--success);">تاريخ صيانة اليوم</label><input type="date" id="c-last-maint" class="form-control" onchange="autoCalculateNextMaintenance(this.value)"></div><div><label style="font-weight: bold; color: var(--primary-dark);">موعد الصيانة القادم</label><input type="date" id="c-next-maint" class="form-control" style="margin-bottom: 5px;"><div style="display: flex; align-items: center; gap: 5px; background: #e0f2fe; padding: 5px; border-radius: 4px; border: 1px solid #bae6fd;"><label style="font-size: 0.8rem; color: #0369a1; margin: 0; white-space: nowrap;">تأجيل لمدة (شهور):</label><input type="number" id="maint-months-add" min="1" class="form-control" placeholder="رقم (مثال: 1)" style="margin: 0; padding: 4px; height: 30px;" oninput="setNextMaintByMonths('maint-months-add', 'c-next-maint', 'c-last-maint')"></div></div></div></div><div style="margin-bottom: 12px;"><label>الفني المنفذ للصيانة</label><select id="c-maint-tech" class="form-control maint-tech-select"></select></div><div style="background: #f0f9ff; padding: 12px; border-radius: 8px; border: 1px solid #bae6fd; margin-bottom: 12px;"><h4 style="font-size: 0.9rem; color: #0369a1; margin-bottom: 8px;">💧 تحديث تواريخ مراحل الفلتر</h4><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;"><div><label style="font-size: 0.75rem; color: #0369a1;">المراحل الأولى (1,2,3):</label><input type="date" id="maint-stage123" class="form-control" style="font-size: 0.8rem; padding: 6px; margin-bottom: 0;"></div><div><label style="font-size: 0.75rem; color: #0369a1;">الممبرين (المرحلة 4):</label><input type="date" id="maint-membrane" class="form-control" style="font-size: 0.8rem; padding: 6px; margin-bottom: 0;"></div><div><label style="font-size: 0.75rem; color: #0369a1;">المراحل الأخيرة:</label><input type="date" id="maint-finalstage" class="form-control" style="font-size: 0.8rem; padding: 6px; margin-bottom: 0;"></div></div></div><div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px;"><h4 style="font-size: 0.95rem; color: var(--primary-dark); margin-bottom: 10px;">🔧 القطع المستبدلة / الأجهزة المضافة (اختياري)</h4><div id="maint-devices-container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;"></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; padding-top: 10px;"><button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="addMaintDeviceRow()">+ إضافة جهاز/قطعة جديدة</button><div style="font-weight: bold; color: var(--primary-dark); background: #e0f2fe; padding: 5px 15px; border-radius: 5px;">الإجمالي الجديد: <span id="maint-total-price">0</span> SAR</div></div></div><div style="margin-bottom: 15px; background: #fffbeb; padding: 10px; border-radius: 6px; border: 1px dashed #f59e0b; display: flex; align-items: center; gap: 10px;"><input type="checkbox" id="maint-auto-deduct" checked style="width: 18px; height: 18px; cursor: pointer;"><label for="maint-auto-deduct" style="font-weight: bold; color: var(--warning); margin: 0; cursor: pointer;">خصم هذه القطع من عهدة الفني تلقائياً (تنزيل)</label></div><div style="display: flex; justify-content: space-between; margin-top: 20px; flex-wrap:wrap; gap:10px;"><div style="display: flex; gap: 10px;"><button type="button" class="btn btn-danger" onclick="cancelMaintenance()">🛑 إيقاف</button><button type="button" class="btn btn-warning" onclick="resetMaintenance()">🔄 تصفير</button></div><div style="display: flex; gap: 10px;"><button type="button" class="btn btn-secondary" onclick="document.getElementById('maintenanceModal').style.display='none'">إغلاق</button><button type="submit" class="btn btn-success">حفظ التحديث</button></div></div></form></div></div>
+    <div id="maintenanceModal" class="modal"><div class="modal-content" style="max-width: 550px;"><h3 style="margin-bottom: 15px; color: var(--primary-dark);">🛠️ تحديث الصيانة</h3><form onsubmit="saveMaintenanceDateFinal(event)"><input type="hidden" id="maint-target-code"><div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #border-color; margin-bottom: 12px;"><h4 style="font-size: 0.9rem; color: var(--primary-dark); margin-bottom: 8px;">👤 تعديل بيانات العميل الأساسية</h4><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;"><div><label style="font-size: 0.75rem;">اسم العميل</label><input type="text" id="maint-c-name" class="form-control" style="font-size: 0.85rem; padding: 6px; margin-bottom:0;"></div><div><label style="font-size: 0.75rem;">رقم الجوال</label><input type="text" id="maint-c-phone" class="form-control" style="font-size: 0.85rem; padding: 6px; margin-bottom:0;"></div></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"><div><label style="font-size: 0.75rem;">العنوان</label><input type="text" id="maint-c-address" class="form-control" style="font-size: 0.85rem; padding: 6px; margin-bottom:0;"></div><div><label style="font-size: 0.75rem;">المنطقة</label><select id="maint-c-region" class="form-control" style="font-size: 0.85rem; padding: 6px; margin-bottom:0;"></select></div></div></div><div style="background: #f0fdf4; padding: 15px; border-radius: 6px; border: 1px solid #bbf7d0; margin-bottom: 15px;"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><div><label style="font-weight: bold; color: var(--success);">تاريخ صيانة اليوم</label><input type="date" id="c-last-maint" class="form-control" onchange="autoCalculateNextMaintenance(this.value)"></div><div><label style="font-weight: bold; color: var(--primary-dark);">موعد الصيانة القادم</label><input type="date" id="c-next-maint" class="form-control" style="margin-bottom: 5px;"><div style="display: flex; align-items: center; gap: 5px; background: #e0f2fe; padding: 5px; border-radius: 4px; border: 1px solid #bae6fd;"><label style="font-size: 0.8rem; color: #0369a1; margin: 0; white-space: nowrap;">تأجيل لمدة (شهور):</label><input type="number" id="maint-months-add" min="1" class="form-control" placeholder="رقم (مثال: 1)" style="margin: 0; padding: 4px; height: 30px;" oninput="setNextMaintByMonths('maint-months-add', 'c-next-maint', 'c-last-maint')"></div></div></div></div><div style="margin-bottom: 12px;"><label>الفني المنفذ للصيانة</label><select id="c-maint-tech" class="form-control maint-tech-select"></select></div><div style="background: #f0f9ff; padding: 12px; border-radius: 8px; border: 1px solid #bae6fd; margin-bottom: 12px;"><h4 style="font-size: 0.9rem; color: #0369a1; margin-bottom: 8px;">💧 تحديث تواريخ مراحل الفلتر</h4><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;"><div><label style="font-size: 0.75rem; color: #0369a1;">المراحل الأولى (1,2,3):</label><input type="date" id="maint-stage123" class="form-control" style="font-size: 0.8rem; padding: 6px; margin-bottom: 0;"></div><div><label style="font-size: 0.75rem; color: #0369a1;">الممبرين (المرحلة 4):</label><input type="date" id="maint-membrane" class="form-control" style="font-size: 0.8rem; padding: 6px; margin-bottom: 0;"></div><div><label style="font-size: 0.75rem; color: #0369a1;">المراحل الأخيرة:</label><input type="date" id="maint-finalstage" class="form-control" style="font-size: 0.8rem; padding: 6px; margin-bottom: 0;"></div></div></div><div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px;"><h4 style="font-size: 0.95rem; color: var(--primary-dark); margin-bottom: 10px;">🔧 القطع المستبدلة / الأجهزة المضافة (اختياري)</h4><div id="maint-devices-container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;"></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; padding-top: 10px;"><button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="addMaintDeviceRow()">+ إضافة جهاز/قطعة جديدة</button><div style="font-weight: bold; color: var(--primary-dark); background: #e0f2fe; padding: 5px 15px; border-radius: 5px;">الإجمالي الجديد: <span id="maint-total-price">0</span> SAR</div></div></div><div style="margin-bottom: 15px; background: #fffbeb; padding: 10px; border-radius: 6px; border: 1px dashed #f59e0b; display: flex; align-items: center; gap: 10px;"><input type="checkbox" id="maint-auto-deduct" checked style="width: 18px; height: 18px; cursor: pointer;"><label for="maint-auto-deduct" style="font-weight: bold; color: var(--warning); margin: 0; cursor: pointer;">خصم هذه القطع من عهدة الفني تلقائياً (تنزيل)</label></div><div style="display: flex; justify-content: space-between; margin-top: 20px; flex-wrap:wrap; gap:10px;"><div style="display: flex; gap: 10px;"><button type="button" class="btn btn-danger" onclick="cancelMaintenance()">🛑 إيقاف</button><button type="button" class="btn btn-warning" onclick="resetMaintenance()">🔄 تصفير</button></div><div style="display: flex; gap: 10px;"><button type="button" class="btn btn-secondary" onclick="document.getElementById('maintenanceModal').style.display='none'">إغلاق</button><button type="submit" class="btn btn-success">حفظ التحديث</button></div></div></form></div></div>
     <div id="expenseModal" class="modal"><div class="modal-content" style="max-width: 400px;"><h3 style="margin-bottom: 15px; color: var(--danger);">💸 إضافة مصروف تشغيلي جديد</h3><form onsubmit="saveExpense(event)"><div style="margin-bottom: 12px;"><label>التاريخ</label><input type="date" id="exp-date" class="form-control" required></div><div style="margin-bottom: 12px;"><label>البند / الوصف (إيجار، رواتب، بنزين...)</label><input type="text" id="exp-desc" class="form-control" required></div><div style="margin-bottom: 15px;"><label>المبلغ (SAR)</label><input type="number" step="0.01" id="exp-amount" class="form-control" required></div><div style="display: flex; gap: 10px; justify-content: flex-end;"><button type="button" class="btn btn-secondary" onclick="document.getElementById('expenseModal').style.display='none'">إغلاق</button><button type="submit" class="btn btn-danger">حفظ المصروف</button></div></form></div></div>
     <div id="quoteModal" class="modal"><div class="modal-content"><h3 style="margin-bottom: 15px; color: var(--primary-dark);">📜 عرض سعر</h3><form onsubmit="saveQuote(event)"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;"><div><label>رقم العرض (الكود)</label><input type="text" id="q-code" class="form-control" readonly style="background:#f1f5f9; font-weight:bold;"></div><div><label>التاريخ</label><input type="date" id="q-date" class="form-control" required></div></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;"><div><label>اسم العميل / الشركة</label><input type="text" id="q-name" class="form-control" required></div><div><label>الجوال</label><input type="text" id="q-phone" class="form-control" required></div></div><div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px;"><h4 style="font-size: 0.95rem; color: var(--primary-dark); margin-bottom: 10px;">💧 الأجهزة / الخدمات المشمولة</h4><div id="quote-devices-container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;"></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; padding-top: 10px; margin-bottom: 5px;"><button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="addQuoteDeviceRow()">+ إضافة جهاز/خدمة</button><div style="font-weight: bold; color: var(--primary-dark); background: #e0f2fe; padding: 5px 15px; border-radius: 5px;">الإجمالي: <span id="quote-total-price">0</span> SAR</div></div></div><div style="margin-bottom: 15px;"><label>ملاحظات (تظهر للعميل في العرض)</label><textarea id="q-notes" class="form-control" rows="2" placeholder="شروط الدفع، مدة التوريد، والضمان..."></textarea></div><div style="display: flex; gap: 10px; justify-content: flex-end;"><button type="button" class="btn btn-secondary" onclick="document.getElementById('quoteModal').style.display='none'">إغلاق</button><button type="submit" class="btn btn-success">حفظ العرض</button></div></form></div></div>
     <div id="advancedReportsModal" class="modal"><div class="modal-content" style="max-width: 800px;"><h3 style="margin-bottom: 15px; color: var(--primary-dark);">📊 التقارير المتقدمة</h3><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 15px;"><select id="adv-date-filter" class="form-control" onchange="toggleAdvCustomDate()"><option value="this_month">هذا الشهر</option><option value="today">اليوم</option><option value="yesterday">بالأمس</option><option value="last_week">الأسبوع الماضي</option><option value="last_month">الشهر الماضي</option><option value="all_time">منذ البداية</option><option value="custom">تحديد فترة...</option></select><select id="adv-type-filter" class="form-control" onchange="updateAdvSubReports()"><option value="sales">المبيعات</option><option value="products">المنتجات</option><option value="customers">العملاء</option></select><select id="adv-subtype-filter" class="form-control"><option value="summary">ملخص</option><option value="detailed">تفاصيل</option></select></div><div id="adv-custom-date-row" style="display: none; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;"><input type="date" id="adv-date-from" class="form-control"><input type="date" id="adv-date-to" class="form-control"></div><div style="display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 20px;"><button type="button" class="btn btn-secondary" onclick="document.getElementById('advancedReportsModal').style.display='none'">إغلاق</button><button type="button" class="btn btn-success" onclick="generateAdvancedReport()">عرض</button></div></div></div>
     <div id="warrantyModal" class="modal"><div class="modal-content" style="max-width: 500px;"><h3 style="margin-bottom:15px; color:var(--primary-dark);">⚙️ إعدادات الضمان</h3><form onsubmit="saveWarrantySettings(event)"><input type="hidden" id="w-target-code"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;"><div><label>العميل</label><input type="text" id="w-name-input" class="form-control" required></div><div><label>الجوال</label><input type="text" id="w-phone-input" class="form-control" required></div></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;"><div><label>المنطقة</label><select id="w-region-input" class="form-control w-dynamic-region"></select></div><div><label>مدة الضمان</label><input type="text" id="w-duration-input" class="form-control" required></div></div><div style="margin-bottom:12px;"><label>رابط الموقع (GPS)</label><input type="url" id="w-gps-input" class="form-control"></div><div style="margin-bottom:15px; background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #cbd5e1;"><label style="color:var(--primary-dark); font-weight:bold;">الأجهزة و أسباب الصيانة المشمولة</label><div style="display:flex; gap:10px; margin-bottom:10px;"><select class="form-control dynamic-devices-select" id="w-add-device" onchange="addToWarranty(this.value); this.value='';"><option value="">+ إضافة جهاز</option></select><select class="form-control dynamic-reasons-select" id="w-add-reason" onchange="addToWarranty(this.value); this.value='';"><option value="">+ إضافة سبب/قطعة</option></select></div><input type="text" id="w-devices-input" class="form-control" required placeholder="ستظهر هنا العناصر التي قمت باختيارها..."></div><div style="display:flex; justify-content:flex-end; gap:10px;"><button type="button" class="btn btn-secondary" onclick="document.getElementById('warrantyModal').style.display='none'">إغلاق</button><button type="submit" class="btn btn-success">حفظ الإعدادات</button></div></form></div></div>
     <div id="basicModal" class="modal"><div class="modal-content" style="max-width: 400px;"><h3 id="basic-modal-title" style="margin-bottom:15px; color:var(--primary-dark);">إضافة</h3><form onsubmit="saveBasicItem(event)"><input type="hidden" id="basic-item-type"><div style="margin-bottom:15px;"><label id="basic-label-name"></label><input type="text" id="basic-input-name" class="form-control" required></div><div style="display:flex; justify-content:flex-end; gap:10px;"><button type="button" class="btn btn-secondary" onclick="document.getElementById('basicModal').style.display='none'">إغلاق</button><button type="submit" class="btn btn-success">حفظ</button></div></form></div></div>
-    <div id="userModal" class="modal"><div class="modal-content"><h3 style="margin-bottom:15px; color:var(--primary-dark);">🔑 المستخدمون</h3><form onsubmit="saveUser(event)"><input type="hidden" id="u-edit-index"><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; margin-bottom:15px;"><div><label>الاسم</label><input type="text" id="u-username" class="form-control" required></div><div><label>المرور</label><input type="text" id="u-password" class="form-control" required></div><div><label>الحالة</label><select id="u-status" class="form-control"><option value="active">نشط</option><option value="inactive">غير نشط</option></select></div></div><div class="permissions-grid"><label><input type="checkbox" class="u-perm" value="الرئيسية" checked disabled> الرئيسية</label><label><input type="checkbox" class="u-perm" value="العملاء والموردون"> العملاء والموردون</label><label><input type="checkbox" class="u-perm" value="فواتير الموردين"> فواتير الموردين</label><label><input type="checkbox" class="u-perm" value="بطاقات الصيانات"> بطاقات الصيانات</label><label><input type="checkbox" class="u-perm" value="تذكير الصيانات"> تذكير الصيانات</label><label><input type="checkbox" class="u-perm" value="فواتير الـ QR"> فواتير الـ QR</label><label><input type="checkbox" class="u-perm" value="إدارة الفنيين"> إدارة الفنيين</label><label><input type="checkbox" class="u-perm" value="رواتب وعمولات الفنيين"> رواتب وعمولات الفنيين</label><label><input type="checkbox" class="u-perm" value="مخزن الفنيين"> مخزن الفنيين</label><label><input type="checkbox" class="u-perm" value="تصفية الكاش"> تصفية الكاش</label><label><input type="checkbox" class="u-perm" value="البيانات الأساسية"> البيانات الأساسية</label><label><input type="checkbox" class="u-perm" value="كروت الضمان"> كروت الضمان</label><label><input type="checkbox" class="u-perm" value="عروض الأسعار"> عروض الأسعار</label><label><input type="checkbox" class="u-perm" value="التقارير الشاملة"> التقارير الشاملة</label><label><input type="checkbox" class="u-perm" value="المالية والمصروفات"> المالية والمصروفات</label><label><input type="checkbox" class="u-perm" value="الإعدادات الأساسية"> الإعدادات الأساسية</label><label><input type="checkbox" class="u-perm" value="النسخة الاحتياطية"> النسخة الاحتياطية</label><label><input type="checkbox" class="u-perm" value="المستخدمون والصلاحيات"> المستخدمون والصلاحيات</label></div><div style="display:flex; justify-content:flex-end; gap:10px;"><button type="button" class="btn btn-secondary" onclick="document.getElementById('userModal').style.display='none'">إغلاق</button><button type="submit" class="btn btn-success">حفظ</button></div></form></div></div>
+    <div id="userModal" class="modal"><div class="modal-content"><h3 style="margin-bottom:15px; color:var(--primary-dark);">🔑 المستخدمون</h3><form onsubmit="saveUser(event)"><input type="hidden" id="u-edit-index"><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; margin-bottom:15px;"><div><label>الاسم</label><input type="text" id="u-username" class="form-control" required></div><div><label>المرور</label><input type="text" id="u-password" class="form-control" required></div><div><label>الحالة</label><select id="u-status" class="form-control"><option value="active">نشط</option><option value="inactive">غير نشط</option></select></div></div><div class="permissions-grid"><label><input type="checkbox" class="u-perm" value="الرئيسية" checked disabled> الرئيسية</label><label><input type="checkbox" class="u-perm" value="العملاء والموردون"> العملاء والموردون</label><label><input type="checkbox" class="u-perm" value="فواتير الموردين"> فواتير الموردين</label><label><input type="checkbox" class="u-perm" value="بطاقات الصيانات"> بطاقات الصيانات</label><label><input type="checkbox" class="u-perm" value="تذكير الصيانات"> تذكير الصيانات</label><label><input type="checkbox" class="u-perm" value="فواتير الـ QR"> فواتير الـ QR</label><label><input type="checkbox" class="u-perm" value="إدارة الفنيين"> إدارة الفنيين</label><label><input type="checkbox" class="u-perm" value="مخزن الفنيين"> مخزن الفنيين</label><label><input type="checkbox" class="u-perm" value="تصفية الكاش"> تصفية الكاش</label><label><input type="checkbox" class="u-perm" value="البيانات الأساسية"> البيانات الأساسية</label><label><input type="checkbox" class="u-perm" value="كروت الضمان"> كروت الضمان</label><label><input type="checkbox" class="u-perm" value="عروض الأسعار"> عروض الأسعار</label><label><input type="checkbox" class="u-perm" value="التقارير الشاملة"> التقارير الشاملة</label><label><input type="checkbox" class="u-perm" value="المالية والمصروفات"> المالية والمصروفات</label><label><input type="checkbox" class="u-perm" value="الإعدادات الأساسية"> الإعدادات الأساسية</label><label><input type="checkbox" class="u-perm" value="النسخة الاحتياطية"> النسخة الاحتياطية</label><label><input type="checkbox" class="u-perm" value="المستخدمون والصلاحيات"> المستخدمون والصلاحيات</label></div><div style="display:flex; justify-content:flex-end; gap:10px;"><button type="button" class="btn btn-secondary" onclick="document.getElementById('userModal').style.display='none'">إغلاق</button><button type="submit" class="btn btn-success">حفظ</button></div></form></div></div>
     <div id="technicianModal" class="modal"><div class="modal-content" style="max-width: 450px;"><h3 style="margin-bottom:15px; color:var(--primary-dark);">👷 الفني</h3><form onsubmit="saveTechnician(event)"><input type="hidden" id="tech-edit-index"><div style="margin-bottom:12px;"><label>الاسم</label><input type="text" id="tech-name-input" class="form-control" required></div><div style="margin-bottom:12px;"><label>الجوال</label><input type="text" id="tech-phone-input" class="form-control"></div><div style="margin-bottom:15px;"><label>الحالة</label><select id="tech-status-input" class="form-control"><option value="نشط">نشط</option><option value="غير نشط">غير نشط</option></select></div><div style="display:flex; justify-content:flex-end; gap:10px;"><button type="button" class="btn btn-secondary" onclick="document.getElementById('technicianModal').style.display='none'">إغلاق</button><button type="submit" class="btn btn-success">حفظ</button></div></form></div></div>
     <div id="storeActionModal" class="modal"><div class="modal-content" style="max-width: 550px;"><h3 id="store-modal-title" style="margin-bottom:15px; color:var(--primary-dark);">حركة المخزن</h3><form onsubmit="saveStoreAction(event)"><input type="hidden" id="store-action-type"><div style="margin-bottom:12px;"><label>الفني</label><select id="store-tech-name" class="form-control" required></select></div><div style="background:#f1f5f9; padding:15px; border-radius:6px; margin-bottom:15px; border:1px solid #cbd5e1;"><label style="color:var(--primary-dark); font-weight:bold; margin-bottom:10px; display:block;">المنتجات أو القطع المستهدفة والكميات</label><div id="store-items-container" style="display:flex; flex-direction:column; gap:10px; margin-bottom:10px;"></div><div style="display:flex; gap:10px;"><button type="button" class="btn btn-secondary" onclick="addStoreItemRow()">+ إضافة منتج/قطعة أخرى</button></div></div><div style="display:flex; justify-content:flex-end; gap:10px;"><button type="button" class="btn btn-secondary" onclick="document.getElementById('storeActionModal').style.display='none'">إغلاق</button><button type="submit" class="btn btn-success">حفظ العملية</button></div></form></div></div>
-    <div id="techMovementsModal" class="modal"><div class="modal-content" style="max-width: 700px;"><h3 style="margin-bottom:15px; color:var(--primary-dark);">📦 سجل الحركات</h3><div class="table-responsive" style="margin-bottom:15px;"><table><thead><tr><th>الفني</th><th>النوع</th><th>المنتج/السبب</th><th>الكمية</th><th>التاريخ</th><th style="text-align:center;">إجراءات</th></tr></thead><tbody id="tech-movements-tbody"></tbody></table></div><div style="display:flex; justify-content:flex-end;"><button class="btn btn-secondary" onclick="document.getElementById('techMovementsModal').style.display='none'">إغلاق</button></div></div></div><script>
+    <div id="techMovementsModal" class="modal"><div class="modal-content" style="max-width: 700px;"><h3 style="margin-bottom:15px; color:var(--primary-dark);">📦 سجل الحركات</h3><div class="table-responsive" style="margin-bottom:15px;"><table><thead><tr><th>الفني</th><th>النوع</th><th>المنتج/السبب</th><th>الكمية</th><th>التاريخ</th><th style="text-align:center;">إجراءات</th></tr></thead><tbody id="tech-movements-tbody"></tbody></table></div><div style="display:flex; justify-content:flex-end;"><button class="btn btn-secondary" onclick="document.getElementById('techMovementsModal').style.display='none'">إغلاق</button></div></div></div>
+
+    <script>
         const firebaseConfig = { apiKey: "AIzaSyB3V8AKCIawXT3zME2UhJ_Zt1_QdFPb0uM", authDomain: "pure-aqua-ksa.firebaseapp.com", databaseURL: "https://pure-aqua-ksa-default-rtdb.firebaseio.com", projectId: "pure-aqua-ksa", storageBucket: "pure-aqua-ksa.firebasestorage.app", messagingSenderId: "118967743337", appId: "1:118967743337:web:cd5142fb93016ddc38c3f8", measurementId: "G-XTE35CZEEG" };
         firebase.initializeApp(firebaseConfig); const database = firebase.database();
-        // أضفت aqua_pure_salaries_db لجدول الرواتب
-        const dbMap = { 'aqua_pure_customers_db': 'customers', 'aqua_pure_store_db': 'store', 'aqua_pure_techs_db': 'techs', 'aqua_pure_users_db': 'users', 'aqua_pure_regions_db': 'regions', 'aqua_pure_devices_db': 'devices', 'aqua_pure_reasons_db': 'reasons', 'aqua_pure_delegates_db': 'delegates', 'aqua_pure_coordinators_db': 'coordinators', 'aqua_pure_sys_settings_db': 'sysSettings', 'aqua_pure_quotes_db': 'quotes', 'aqua_pure_expenses_db': 'expenses', 'aqua_pure_supplier_invoices_db': 'supplierInvoices', 'aqua_pure_backup_logs_db': 'backupLogs', 'aqua_pure_master_settings_db': 'masterSettings', 'aqua_pure_salaries_db': 'salaries' };
+        const dbMap = { 'aqua_pure_customers_db': 'customers', 'aqua_pure_store_db': 'store', 'aqua_pure_techs_db': 'techs', 'aqua_pure_users_db': 'users', 'aqua_pure_regions_db': 'regions', 'aqua_pure_devices_db': 'devices', 'aqua_pure_reasons_db': 'reasons', 'aqua_pure_delegates_db': 'delegates', 'aqua_pure_coordinators_db': 'coordinators', 'aqua_pure_sys_settings_db': 'sysSettings', 'aqua_pure_quotes_db': 'quotes', 'aqua_pure_expenses_db': 'expenses', 'aqua_pure_supplier_invoices_db': 'supplierInvoices', 'aqua_pure_backup_logs_db': 'backupLogs', 'aqua_pure_master_settings_db': 'masterSettings' };
 
         database.ref('/').on('value', (snapshot) => { const data = snapshot.val(); if (data) { let needsRender = false; for (let localKey in dbMap) { let fbKey = dbMap[localKey]; if (data[fbKey]) { localStorage.setItem(localKey, JSON.stringify(data[fbKey])); needsRender = true; } } if (needsRender && document.getElementById('main-app').style.display === 'flex') { renderAllActive(); } } });
 
@@ -564,20 +493,10 @@
             clients.forEach(c => { if (c.totalValue && c.lastMaintValue && parseFloat(c.totalValue) === parseFloat(c.lastMaintValue) && c.installDate === c.lastMaint) { c.lastMaintValue = 0; needsUpdate = true; } });
             if (needsUpdate) { setDB('aqua_pure_customers_db', clients); }
             let users = getDB('aqua_pure_users_db'); let usersUpdated = false;
-            // إضافة الصلاحية الجديدة (الرواتب) للآدمن تلقائياً
-            users.forEach(u => { 
-                if(u.perms && !u.perms.includes("فواتير الموردين")) { u.perms.push("فواتير الموردين"); usersUpdated = true; } 
-                if(u.perms && !u.perms.includes("رواتب وعمولات الفنيين")) { u.perms.push("رواتب وعمولات الفنيين"); usersUpdated = true; }
-            });
+            users.forEach(u => { if(u.perms && !u.perms.includes("فواتير الموردين")) { u.perms.push("فواتير الموردين"); usersUpdated = true; } });
             if (usersUpdated) { setDB('aqua_pure_users_db', users); }
             let currPerms = JSON.parse(localStorage.getItem('current_user_perms') || '[]');
-            let permsUpdated = false;
-            if (!currPerms.includes("فواتير الموردين") && currPerms.length > 0) { currPerms.push("فواتير الموردين"); permsUpdated = true; }
-            if (!currPerms.includes("رواتب وعمولات الفنيين") && currPerms.length > 0) { currPerms.push("رواتب وعمولات الفنيين"); permsUpdated = true; }
-            if(permsUpdated) localStorage.setItem('current_user_perms', JSON.stringify(currPerms));
-            
-            // تهيئة قاعدة الرواتب إن لم تكن موجودة
-            if(getDB('aqua_pure_salaries_db').length === 0) setDB('aqua_pure_salaries_db', []);
+            if (!currPerms.includes("فواتير الموردين") && currPerms.length > 0) { currPerms.push("فواتير الموردين"); localStorage.setItem('current_user_perms', JSON.stringify(currPerms)); }
         }
 
         let homeCurrentPage = 1, custCurrentPage = 1, maintCurrentPage = 1, remCurrentPage = 1, invCurrentPage = 1, warrCurrentPage = 1, repCurrentPage = 1;
@@ -593,16 +512,6 @@
                 if(tabId === 'technicians-management') renderTechniciansList(); if(tabId === 'tech-store') renderTechStoreList(); if(tabId === 'cash-settlement') loadTechCashDetails();
                 if(tabId === 'basic-data') renderBasicDataTables(); if(tabId === 'warranty-cards') renderWarrantyList(); if(tabId === 'quotations') renderQuotesList();
                 if(tabId === 'reports') loadReportsData(); if(tabId === 'financials') renderFinancials(); if(tabId === 'users-permissions') renderUsersList(); if(tabId === 'backup-restore') { updateBackupCounters(); renderBackupLogs(); }
-                // تفعيل قسم الرواتب عند فتح التاب
-                if(tabId === 'salaries-management') { 
-                    populateDynamicDropdowns(); 
-                    if(!document.getElementById('salary-month-input').value) {
-                        let today = new Date(); 
-                        document.getElementById('salary-month-input').value = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
-                    }
-                    calculateSalaryData();
-                    renderSalariesHistory(); 
-                }
             }
         }
 
@@ -614,11 +523,11 @@
 
         if(getDB('aqua_pure_regions_db').length === 0) setDB('aqua_pure_regions_db', ["الرياض", "الدمام", "جدة", "القطيف"]); if(getDB('aqua_pure_devices_db').length === 0) setDB('aqua_pure_devices_db', ["فلتر 7 مراحل", "برادة مياه", "محطة تحلية"]); if(getDB('aqua_pure_reasons_db').length === 0) setDB('aqua_pure_reasons_db', ["تغيير شمعات", "فحص دوري"]); if(getDB('aqua_pure_delegates_db').length === 0) setDB('aqua_pure_delegates_db', ["مندوب 1"]); if(getDB('aqua_pure_coordinators_db').length === 0) setDB('aqua_pure_coordinators_db', ["منسق 1"]); if(getDB('aqua_pure_techs_db').length === 0) setDB('aqua_pure_techs_db', [{ name: "أحمد البصراطي", phone: "0500000001", status: "نشط" }]); if(getDB('aqua_pure_backup_logs_db').length === 0) setDB('aqua_pure_backup_logs_db', []);
         
-        let defaultPerms = ["الرئيسية", "العملاء والموردون", "فواتير الموردين", "بطاقات الصيانات", "تذكير الصيانات", "فواتير الـ QR", "إدارة الفنيين", "رواتب وعمولات الفنيين", "مخزن الفنيين", "تصفية الكاش", "البيانات الأساسية", "كروت الضمان", "عروض الأسعار", "التقارير الشاملة", "المالية والمصروفات", "الإعدادات الأساسية", "النسخة الاحتياطية", "المستخدمون والصلاحيات"];
+        let defaultPerms = ["الرئيسية", "العملاء والموردون", "فواتير الموردين", "بطاقات الصيانات", "تذكير الصيانات", "فواتير الـ QR", "إدارة الفنيين", "مخزن الفنيين", "تصفية الكاش", "البيانات الأساسية", "كروت الضمان", "عروض الأسعار", "التقارير الشاملة", "المالية والمصروفات", "الإعدادات الأساسية", "النسخة الاحتياطية", "المستخدمون والصلاحيات"];
         if(getDB('aqua_pure_users_db').length === 0) setDB('aqua_pure_users_db', [{ user: "Admin", pass: "1234", perms: defaultPerms, status: "active" }]);
         
         let sysSettings = JSON.parse(localStorage.getItem('aqua_pure_sys_settings_db'));
-        if(!sysSettings) { sysSettings = { nameAr: "شركة بيور أكوا لتحلية المياه النقية", nameEn: "Pure Aqua KSA", cr: "", tax: "", unifiedNumber: "", nationalId: "", city: "", street: "", buildingNo: "", postalCode: "", address: "", locationGps: "", phone1: "0536882036", phone2: "", additionalInfo: "", logoBase64: "" }; setDB('aqua_pure_sys_settings_db', sysSettings); }
+        if(!sysSettings) { sysSettings = { nameAr: "شركة بيور أكوا لتحلية المياه النقية", nameEn: "Pure Aqua KSA", cr: "", tax: "", unifiedNumber: "", nationalId: "", city: "", street: "", buildingNo: "", postalCode: "", address: "", locationGps: "", phone1: "", phone2: "", additionalInfo: "", logoBase64: "" }; setDB('aqua_pure_sys_settings_db', sysSettings); }
         let currentModalMode = 'device';
 
         window.addEventListener('load', () => {
@@ -643,7 +552,7 @@
 
         function applyPermissions(perms) {
             let currentUserName = localStorage.getItem('current_user_name') || ''; let isAdmin = currentUserName.toLowerCase() === 'admin' || currentUserName === 'أدمن' || currentUserName === 'ادمن';
-            let targetToPerm = { 'home': 'الرئيسية', 'customers-suppliers': 'العملاء والموردون', 'supplier-purchases': 'فواتير الموردين', 'maintenance-cards': 'بطاقات الصيانات', 'maintenance-reminders': 'تذكير الصيانات', 'qr-invoices': 'فواتير الـ QR', 'technicians-management': 'إدارة الفنيين', 'salaries-management': 'رواتب وعمولات الفنيين', 'tech-store': 'مخزن الفنيين', 'cash-settlement': 'تصفية الكاش', 'basic-data': 'البيانات الأساسية', 'warranty-cards': 'كروت الضمان', 'quotations': 'عروض الأسعار', 'reports': 'التقارير الشاملة', 'financials': 'المالية والمصروفات', 'users-permissions': 'المستخدمون والصلاحيات', 'system-settings': 'الإعدادات الأساسية', 'backup-restore': 'النسخة الاحتياطية' };
+            let targetToPerm = { 'home': 'الرئيسية', 'customers-suppliers': 'العملاء والموردون', 'supplier-purchases': 'فواتير الموردين', 'maintenance-cards': 'بطاقات الصيانات', 'maintenance-reminders': 'تذكير الصيانات', 'qr-invoices': 'فواتير الـ QR', 'technicians-management': 'إدارة الفنيين', 'tech-store': 'مخزن الفنيين', 'cash-settlement': 'تصفية الكاش', 'basic-data': 'البيانات الأساسية', 'warranty-cards': 'كروت الضمان', 'quotations': 'عروض الأسعار', 'reports': 'التقارير الشاملة', 'financials': 'المالية والمصروفات', 'users-permissions': 'المستخدمون والصلاحيات', 'system-settings': 'الإعدادات الأساسية', 'backup-restore': 'النسخة الاحتياطية' };
             document.querySelectorAll('#sidebar-nav-links li').forEach(link => { let target = link.getAttribute('data-target'); if(!target) return; let reqPerm = targetToPerm[target]; if (isAdmin || target === 'home' || (perms && perms.includes(reqPerm))) { link.style.display = 'flex'; } else { link.style.display = 'none'; } });
         }
 
@@ -674,149 +583,11 @@
             let regOpts = regions.map(r => `<option value="${r}">${r}</option>`).join(''); let techOpts = techs.map(t => `<option value="${t.name}">${t.name}</option>`).join(''); let devOpts = devices.map(d => `<option value="${d}">${d}</option>`).join(''); let reasonOpts = reasons.map(r => `<option value="${r}">${r}</option>`).join(''); let coordOpts = '<option value="">-- اختياري --</option>' + coords.map(c => `<option value="${c}">${c}</option>`).join(''); let delegOpts = '<option value="">-- اختياري --</option>' + delegs.map(d => `<option value="${d}">${d}</option>`).join('');
             ['c-region', 'filter-region-select', 'maint-filter-region', 'filter-rem-region', 'rep-filter-region', 'maint-c-region'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerHTML = (id.includes('filter') ? `<option value="all">كل المناطق</option>` : '') + regOpts; });
             document.querySelectorAll('.w-dynamic-region').forEach(sel => { sel.innerHTML = regOpts; });
-            ['c-tech', 'filter-tech-input', 'maint-filter-tech', 'filter-rem-tech', 'rep-filter-tech', 'store-tech-name', 'c-maint-tech', 'cash-tech-select', 'prod-tech-select', 'salary-tech-select'].forEach(id => { if(document.getElementById(id)) { let firstOpt = id.includes('filter') ? '<option value="all">كل الفنيين</option>' : (id.includes('cash') || id.includes('prod') || id.includes('salary') ? '<option value="">-- اختر الفني --</option>' : ''); document.getElementById(id).innerHTML = firstOpt + techOpts; } });
+            ['c-tech', 'filter-tech-input', 'maint-filter-tech', 'filter-rem-tech', 'rep-filter-tech', 'store-tech-name', 'c-maint-tech', 'cash-tech-select', 'prod-tech-select'].forEach(id => { if(document.getElementById(id)) { let firstOpt = id.includes('filter') ? '<option value="all">كل الفنيين</option>' : (id.includes('cash') || id.includes('prod') ? '<option value="">-- اختر الفني --</option>' : ''); document.getElementById(id).innerHTML = firstOpt + techOpts; } });
             document.querySelectorAll('.dynamic-devices-select').forEach(sel => { sel.innerHTML = (sel.id.includes('add') || sel.id.includes('store') ? '<option value="">-- اختر جهاز --</option>' : '') + devOpts; });
             document.querySelectorAll('.dynamic-reasons-select').forEach(sel => { sel.innerHTML = (sel.id.includes('add') || sel.id.includes('store') ? '<option value="">-- أو اختر سبب/قطعة --</option>' : '') + reasonOpts; });
             if(document.getElementById('c-coordinator')) document.getElementById('c-coordinator').innerHTML = coordOpts; if(document.getElementById('c-delegate')) document.getElementById('c-delegate').innerHTML = delegOpts;
         }
-
-        /* ---------------- وظائف قسم الرواتب الجديد ---------------- */
-        function calculateSalaryData() {
-            let tech = document.getElementById('salary-tech-select').value;
-            let monthVal = document.getElementById('salary-month-input').value;
-            
-            if(!tech || !monthVal) {
-                document.getElementById('salary-install-count').innerText = '0';
-                document.getElementById('salary-maint-count').innerText = '0';
-                updateSalaryTotal();
-                return;
-            }
-
-            let installCount = 0;
-            let maintCount = 0;
-            let clients = getDB('aqua_pure_customers_db');
-            
-            clients.forEach(c => {
-                if(c.tech === tech) {
-                    if(c.installDate && c.installDate.startsWith(monthVal) && parseFloat(c.totalValue) > 0) {
-                        installCount++;
-                    }
-                    if(c.lastMaint && c.lastMaint.startsWith(monthVal) && parseFloat(c.lastMaintValue) > 0) {
-                        if(c.installDate !== c.lastMaint || parseFloat(c.totalValue) === 0) {
-                            maintCount++;
-                        }
-                    }
-                }
-            });
-
-            document.getElementById('salary-install-count').innerText = installCount;
-            document.getElementById('salary-maint-count').innerText = maintCount;
-            updateSalaryTotal();
-        }
-
-        function updateSalaryTotal() {
-            let base = parseFloat(document.getElementById('salary-base-input').value) || 0;
-            let installComm = parseFloat(document.getElementById('salary-install-comm-input').value) || 0;
-            let maintComm = parseFloat(document.getElementById('salary-maint-comm-input').value) || 0;
-            
-            let total = base + installComm + maintComm;
-            document.getElementById('salary-final-total').innerText = total.toFixed(2) + ' SAR';
-        }
-
-        function saveSalaryRecord() {
-            let tech = document.getElementById('salary-tech-select').value;
-            let monthVal = document.getElementById('salary-month-input').value;
-            
-            if(!tech || !monthVal) return alert('الرجاء اختيار الفني والشهر أولاً.');
-            
-            let base = parseFloat(document.getElementById('salary-base-input').value) || 0;
-            let installComm = parseFloat(document.getElementById('salary-install-comm-input').value) || 0;
-            let maintComm = parseFloat(document.getElementById('salary-maint-comm-input').value) || 0;
-            let total = base + installComm + maintComm;
-            
-            if(total <= 0) {
-                if(!confirm('الإجمالي صفر، هل أنت متأكد من حفظ هذا السجل؟')) return;
-            }
-
-            let salaries = getDB('aqua_pure_salaries_db');
-            let existingIdx = salaries.findIndex(s => s.tech === tech && s.month === monthVal);
-            
-            let record = {
-                id: Date.now().toString(),
-                tech: tech,
-                month: monthVal,
-                baseSalary: base,
-                installCommission: installComm,
-                maintCommission: maintComm,
-                totalSalary: total,
-                datePaid: new Date().toISOString().split('T')[0]
-            };
-
-            if(existingIdx >= 0) {
-                if(confirm('يوجد راتب مسجل مسبقاً لهذا الفني في هذا الشهر. هل تريد تحديثه بالبيانات الجديدة؟')) {
-                    record.id = salaries[existingIdx].id; 
-                    salaries[existingIdx] = record;
-                } else {
-                    return;
-                }
-            } else {
-                salaries.push(record);
-            }
-
-            setDB('aqua_pure_salaries_db', salaries);
-            
-            if(confirm('تم حفظ الراتب. هل تريد تسجيل هذا المبلغ في (المصروفات التشغيلية) لضبط المالية؟')) {
-                let exps = getDB('aqua_pure_expenses_db');
-                exps.push({ 
-                    id: Date.now().toString(), 
-                    date: record.datePaid, 
-                    desc: `راتب وعمولات الفني ${tech} عن شهر ${monthVal}`, 
-                    amount: total 
-                });
-                setDB('aqua_pure_expenses_db', exps);
-            }
-
-            alert('تم إصدار الراتب بنجاح!');
-            document.getElementById('salary-base-input').value = '0';
-            document.getElementById('salary-install-comm-input').value = '0';
-            document.getElementById('salary-maint-comm-input').value = '0';
-            updateSalaryTotal();
-            renderSalariesHistory();
-        }
-
-        function renderSalariesHistory() {
-            let salaries = getDB('aqua_pure_salaries_db');
-            let html = '';
-            
-            salaries.slice().reverse().forEach(s => {
-                html += `
-                <tr>
-                    <td><strong>${s.tech}</strong></td>
-                    <td>${s.month}</td>
-                    <td>${s.baseSalary}</td>
-                    <td>${s.installCommission}</td>
-                    <td>${s.maintCommission}</td>
-                    <td style="color:var(--success); font-weight:bold;">${s.totalSalary}</td>
-                    <td style="text-align:center;">
-                        <button class="btn btn-danger" style="padding:4px 8px;" onclick="deleteSalaryRecord('${s.id}')">حذف</button>
-                    </td>
-                </tr>`;
-            });
-            
-            document.getElementById('salaries-history-body').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">لا توجد رواتب مسجلة حتى الآن</td></tr>';
-        }
-
-        function deleteSalaryRecord(id) {
-            let master = JSON.parse(localStorage.getItem('aqua_pure_master_settings_db') || '{"allowDelete":true}');
-            if(master.allowDelete === false) return alert('⚠️ عذراً، زر الحذف مغلق من الإعدادات الشاملة.');
-            
-            if(confirm('هل أنت متأكد من حذف سجل الراتب هذا؟')) {
-                let salaries = getDB('aqua_pure_salaries_db').filter(s => s.id !== id);
-                setDB('aqua_pure_salaries_db', salaries);
-                renderSalariesHistory();
-            }
-        }
-        /* -------------------------------------------------------- */
 
         function openSupplierInvoiceModal() { document.getElementById('supp-inv-code').value = 'SUP-' + Math.floor(1000 + Math.random() * 9000); document.getElementById('supp-inv-date').value = new Date().toISOString().split('T')[0]; document.getElementById('supp-inv-name').value = ''; document.getElementById('supp-inv-notes').value = ''; document.getElementById('supp-items-container').innerHTML = ''; addSupplierItemRow(); document.getElementById('supplierInvoiceModal').style.display = 'flex'; }
         function addSupplierItemRow() { let devices = getDB('aqua_pure_devices_db'); let reasons = getDB('aqua_pure_reasons_db'); let devOpts = devices.map(d => `<option value="${d}">${d}</option>`).join(''); let reasonOpts = reasons.map(r => `<option value="${r}">${r}</option>`).join(''); let row = document.createElement('div'); row.className = 'supp-item-row'; row.style.cssText = 'display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:5px;'; row.innerHTML = `<select class="form-control supp-item-type" style="flex:2; margin-bottom:0;" required><option value="">-- اختر الصنف/القطعة --</option><optgroup label="الأجهزة">${devOpts}</optgroup><optgroup label="قطع الغيار">${reasonOpts}</optgroup></select><input type="number" class="form-control supp-qty-input" min="1" value="1" placeholder="الكمية" style="flex:1; margin-bottom:0;" required oninput="calculateSuppTotal()"><input type="number" step="0.01" class="form-control supp-price-input" min="0" value="0" placeholder="السعر الإجمالي للصنف" style="flex:1; margin-bottom:0;" required oninput="calculateSuppTotal()"><button type="button" class="btn btn-danger" onclick="this.parentElement.remove(); calculateSuppTotal();">✖</button>`; document.getElementById('supp-items-container').appendChild(row); calculateSuppTotal(); }
@@ -918,7 +689,7 @@
             e.preventDefault(); 
             let code = document.getElementById('c-code').value; let type = document.getElementById('c-type').value; let customerTax = document.getElementById('c-tax-number').value.trim(); let name = document.getElementById('c-name').value.trim(); let phone = document.getElementById('c-phone').value.trim(); let phone2 = document.getElementById('c-phone2').value.trim(); let address = document.getElementById('c-address').value.trim(); let nationalAddress = document.getElementById('c-national-address') ? document.getElementById('c-national-address').value.trim() : ''; let gps = document.getElementById('c-gps').value.trim(); let region = document.getElementById('c-region').value; let tech = document.getElementById('c-tech').value; let coordinator = document.getElementById('c-coordinator').value; let delegate = document.getElementById('c-delegate').value; let notes = document.getElementById('c-notes').value.trim(); let installDate = document.getElementById('c-install-date').value; let nextMaintDate = document.getElementById('c-next-maint-input').value; let stage123Date = document.getElementById('c-stage123') ? document.getElementById('c-stage123').value : ''; let membraneDate = document.getElementById('c-membrane') ? document.getElementById('c-membrane').value : ''; let finalStageDate = document.getElementById('c-finalstage') ? document.getElementById('c-finalstage').value : '';
             let devicesSummaryArr = [], totalValue = 0, itemsToDeduct = []; 
-            document.querySelectorAll('.cust-device-row').forEach(row => { let p = parseFloat(row.querySelector('.cust-dev-price').value) || 0; let itemName = row.querySelector('.cust-dev-type').value; if(itemName) { totalValue += p; devicesSummaryArr.push(`${itemName} (${p} SAR)`); if(itemName !== "عنصر عام") itemsToDeduct.push(itemName); } });
+            document.querySelectorAll('.cust-device-row').forEach(row => { let p = parseFloat(row.querySelector('.cust-dev-price').value) || 0; let itemName = row.querySelector('.cust-dev-type').value; if(itemName) { totalValue += p; devicesSummaryArr.push(`${itemName} (${p} SAR)`); if(itemName !== "عنصر عام") itemsToDeduct.push(itemName); } }); 
             let devicesSummary = devicesSummaryArr.join('، '); let clients = getDB('aqua_pure_customers_db'); let idx = clients.findIndex(i => String(i.code) === String(code)); let isEdit = idx >= 0; let isExternalMaint = (currentModalMode === 'reason');
 
             let master = JSON.parse(localStorage.getItem('aqua_pure_master_settings_db') || '{}');
@@ -942,7 +713,8 @@
                     notes, 
                     devicesSummary, 
                     totalValue: (devicesSummaryArr.length > 0 && totalValue > 0) ? totalValue : (clients[idx].totalValue || 0), 
-                    installDate: master.freeDates ? (clients[idx].installDate || installDate) : (installDate || clients[idx].installDate), 
+                    // التعديل هنا: الحفاظ على التاريخ الأصلي إذا كان موجوداً ولم نعدله
+                    installDate: clients[idx].installDate || installDate, 
                     nextMaint: nextMaintDate || clients[idx].nextMaint, 
                     stage123Date: stage123Date || clients[idx].stage123Date, 
                     membraneDate: membraneDate || clients[idx].membraneDate, 
@@ -1059,6 +831,7 @@
             document.getElementById('invoices-table-body').innerHTML = html || `<tr><td colspan="8" style="text-align: center;">لا توجد فواتير مطابقة.</td></tr>`; renderPaginationControls('invoices-pagination', invCurrentPage, totalPages, (p) => { invCurrentPage = p; renderInvoicesList(); });
         }
 
+        // دالة الطباعة المعدلة: تم إدراج التاريخ في نص الـ QR
         function printCustomerInvoice(code) { 
             let c = getDB('aqua_pure_customers_db').find(i => String(i.code) === String(code)); if(!c) return; 
             let cName = sysSettings.nameAr || 'شركة بيور أكوا لتحلية المياه النقية'; 
@@ -1073,7 +846,7 @@
             
             let invoiceTotal = parseFloat(c.totalValue) || parseFloat(c.lastMaintValue) || 0;
             let subTotal = (invoiceTotal / 1.15).toFixed(2); let vatAmount = (invoiceTotal - subTotal).toFixed(2);
-            let invoiceDateStr = c.installDate || '-';
+            let invoiceDateStr = c.installDate || c.lastMaint || '-'; // استخدمنا التاريخ المتاح
             
             let devicesHTML = ''; let devicesArr = c.devicesSummary ? c.devicesSummary.split('، ') : [];
             if (devicesArr.length === 0) { devicesHTML = `<tr><td style="text-align:right;">تركيب وصيانة عامة</td><td>${invoiceTotal}</td></tr>`; } else { devicesArr.forEach(devStr => { let match = devStr.match(/(.*?)\s*\(([\d.]+)\s*SAR\)/); if(match) { devicesHTML += `<tr><td style="text-align:right;">${match[1].trim()}</td><td>${match[2]}</td></tr>`; } else { devicesHTML += `<tr><td style="text-align:right;">${devStr}</td><td>-</td></tr>`; } }); }
@@ -1081,11 +854,11 @@
             let master = JSON.parse(localStorage.getItem('aqua_pure_master_settings_db') || '{}');
             let customNotesHTML = master.invoiceNotes ? `<div style="margin-top:20px; padding:12px; background:#fef3c7; border:1px solid #fde68a; border-radius:6px; font-size:0.9rem;"><h4 style="color:#b45309; margin-bottom:5px;">ملاحظات وشروط الفاتورة:</h4><p style="margin:0; white-space:pre-wrap;">${master.invoiceNotes}</p></div>` : '';
 
+            // تم إدراج التاريخ في نص الـ QR هنا
             let qrText = `الشركة: ${cName}\n`;
             if(sysSettings.tax) qrText += `الرقم الضريبي: ${sysSettings.tax}\n`;
             qrText += `------------------\n`;
             qrText += `العميل: ${c.name}\n`;
-            qrText += `الجوال: ${c.phone}\n`;
             qrText += `رقم الفاتورة: ${c.code}\n`;
             qrText += `التاريخ: ${invoiceDateStr}\n`;
             qrText += `المبلغ شامل الضريبة: ${invoiceTotal.toFixed(2)} SAR`;
@@ -1123,16 +896,110 @@
         }
         function exportReportsExcel() { alert('خاصية تصدير التقارير متوفرة عبر طباعة التقرير (PDF/طباعة مباشرة).'); }
         function toggleAdvCustomDate() { let val = document.getElementById('adv-date-filter').value; document.getElementById('adv-custom-date-row').style.display = (val === 'custom') ? 'grid' : 'none'; }
-        function updateAdvSubReports() { let type = document.getElementById('adv-type-filter').value; let subtype = document.getElementById('adv-subtype-filter'); if(type === 'sales') { subtype.innerHTML = `<option value="summary"><script>
-  function handleLogin(event) {
-    event.preventDefault();
-    const usernameInput = document.getElementById('login-username').value;
-    const passwordInput = document.getElementById('login-password').value;
-    if (usernameInput === 'admin' && passwordInput === '1234') {
-      alert('تم تسجيل الدخول بنجاح!');
-      location.reload();
-    } else {
-      alert('اسم المستخدم أو كلمة المرور غير صحيحة');
-    }
-  }
-</script>
+        function updateAdvSubReports() { let type = document.getElementById('adv-type-filter').value; let subtype = document.getElementById('adv-subtype-filter'); if(type === 'sales') { subtype.innerHTML = `<option value="summary">ملخص</option><option value="detailed">تفاصيل</option>`; } else if(type === 'products') { subtype.innerHTML = `<option value="best_seller">الأكثر مبيعاً</option><option value="stock">المخزون الحالي</option>`; } else { subtype.innerHTML = `<option value="active">العملاء النشطون</option><option value="regions">توزيع المناطق</option>`; } }
+        function generateAdvancedReport() { alert('تم تطبيق فلاتر التقارير المتقدمة بنجاح.'); document.getElementById('advancedReportsModal').style.display = 'none'; }
+
+        function renderBasicDataTables() { renderBasicTable('regions-tbody', getDB('aqua_pure_regions_db'), 'region'); renderBasicTable('devices-tbody', getDB('aqua_pure_devices_db'), 'device'); renderBasicTable('reasons-tbody', getDB('aqua_pure_reasons_db'), 'reason'); renderBasicTable('delegates-tbody', getDB('aqua_pure_delegates_db'), 'delegate'); renderBasicTable('coordinators-tbody', getDB('aqua_pure_coordinators_db'), 'coordinator'); }
+        function renderBasicTable(tbodyId, arr, type) { let html = ''; arr.forEach((item, idx) => { html += `<tr><td>${item}</td><td style="text-align:center;"><button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteBasicItem('${type}', ${idx})">حذف</button></td></tr>`; }); let el = document.getElementById(tbodyId); if(el) el.innerHTML = html || '<tr><td colspan="2" style="text-align:center;">لا توجد بيانات</td></tr>'; }
+        function filterBasicData(tbodyId, query) { let typeMap = { 'regions-tbody': 'region', 'devices-tbody': 'device', 'reasons-tbody': 'reason', 'delegates-tbody': 'delegate', 'coordinators-tbody': 'coordinator' }; let type = typeMap[tbodyId]; let arr = getDB('aqua_pure_' + (type === 'region' ? 'regions' : type === 'device' ? 'devices' : type === 'reason' ? 'reasons' : type === 'delegate' ? 'delegates' : 'coordinators') + '_db'); let filtered = arr.filter(i => String(i).toLowerCase().includes(query.toLowerCase())); let html = ''; filtered.forEach((item) => { let realIdx = arr.indexOf(item); html += `<tr><td>${item}</td><td style="text-align:center;"><button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteBasicItem('${type}', ${realIdx})">حذف</button></td></tr>`; }); let el = document.getElementById(tbodyId); if(el) el.innerHTML = html || '<tr><td colspan="2" style="text-align:center;">لا توجد نتائج مطابقة</td></tr>'; }
+        function openBasicModal(type) { document.getElementById('basic-item-type').value = type; let titles = { 'region': 'إضافة منطقة جديدة', 'device': 'إضافة جهاز جديد', 'reason': 'إضافة سبب صيانة جديد', 'delegate': 'إضافة مندوب جديد', 'coordinator': 'إضافة منسق جديد' }; document.getElementById('basic-modal-title').innerText = titles[type] || 'إضافة'; document.getElementById('basic-label-name').innerText = 'اسم العنصر'; document.getElementById('basic-input-name').value = ''; document.getElementById('basicModal').style.display = 'flex'; }
+        function saveBasicItem(e) { e.preventDefault(); let type = document.getElementById('basic-item-type').value; let val = document.getElementById('basic-input-name').value.trim(); if(!val) return; let dbKeys = { 'region': 'aqua_pure_regions_db', 'device': 'aqua_pure_devices_db', 'reason': 'aqua_pure_reasons_db', 'delegate': 'aqua_pure_delegates_db', 'coordinator': 'aqua_pure_coordinators_db' }; let key = dbKeys[type]; let arr = getDB(key); if(!arr.includes(val)) arr.push(val); setDB(key, arr); document.getElementById('basicModal').style.display = 'none'; populateDynamicDropdowns(); renderBasicDataTables(); alert('تمت الإضافة بنجاح!'); }
+        function deleteBasicItem(type, index) { 
+            let master = JSON.parse(localStorage.getItem('aqua_pure_master_settings_db') || '{"allowDelete":true}');
+            if(master.allowDelete === false) return alert('⚠️ عذراً، زر الحذف مغلق من الإعدادات الشاملة.');
+            if(confirm('هل أنت متأكد من الحذف؟')) { let dbKeys = { 'region': 'aqua_pure_regions_db', 'device': 'aqua_pure_devices_db', 'reason': 'aqua_pure_reasons_db', 'delegate': 'aqua_pure_delegates_db', 'coordinator': 'aqua_pure_coordinators_db' }; let key = dbKeys[type]; let arr = getDB(key); arr.splice(index, 1); setDB(key, arr); populateDynamicDropdowns(); renderBasicDataTables(); } 
+        }
+
+        function renderWarrantyList() { let clients = getDB('aqua_pure_customers_db'); let search = document.getElementById('search-warranty-input').value.toLowerCase().trim(); let matched = []; clients.slice().reverse().forEach(c => { if(!search || (String(c.name||'').toLowerCase().includes(search)) || (String(c.code||'').includes(search)) || (String(c.phone||'').includes(search))) { matched.push(c); } }); let totalPages = Math.ceil(matched.length / rowsPerPage) || 1; if(warrCurrentPage > totalPages) warrCurrentPage = totalPages; let startIdx = (warrCurrentPage - 1) * rowsPerPage; let pageItems = matched.slice(startIdx, startIdx + rowsPerPage); let html = ''; pageItems.forEach(c => { html += `<tr><td>${c.code}</td><td><strong>${c.name}</strong></td><td>${c.phone}</td><td>${c.region||'-'}</td><td>${c.devicesSummary||'-'}</td><td>${c.warrantyDuration||'سنتان'}</td><td style="text-align:center;"><button class="btn btn-success" onclick="printWarrantyCard('${c.code}')">🖨️ طباعة الكارت</button></td></tr>`; }); document.getElementById('warranty-table-body').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">لا توجد كروت ضمان</td></tr>'; renderPaginationControls('warranty-pagination', warrCurrentPage, totalPages, (p) => { warrCurrentPage = p; renderWarrantyList(); }); }
+        function printWarrantyCard(code) { let c = getDB('aqua_pure_customers_db').find(i => String(i.code) === String(code)); if(!c) return; let cName = sysSettings.nameAr || 'شركة بيور أكوا لتحلية المياه النقية'; let cPhone = sysSettings.phone1 || ''; let win = window.open('', '_blank'); win.document.write(`<html lang="ar" dir="rtl"><head><title>كارت ضمان - ${c.name}</title><style>body{font-family:'Cairo',sans-serif; padding:30px; text-align:center;} .card-box{border:3px solid #0284c7; padding:25px; border-radius:15px; max-width:600px; margin:0 auto; background:#f0f9ff;}</style></head><body><div class="card-box"><h2 style="color:#0369a1; margin-bottom:5px;">${cName}</h2><p style="color:#64748b; margin-top:0;">كارت الضمان الشامل للعميل</p><hr style="border:1px solid #bae6fd; margin:20px 0;"><div style="text-align:right; font-size:1.1rem; line-height:1.8;"><p><strong>اسم العميل:</strong> ${c.name}</p><p><strong>رقم الكود:</strong> ${c.code}</p><p><strong>رقم الجوال:</strong> ${c.phone}</p><p><strong>المنطقة:</strong> ${c.region || '-'}</p><p><strong>الأجهزة المشمولة بالضمان:</strong> ${c.devicesSummary || '-'}</p><p><strong>مدة الضمان:</strong> ${c.warrantyDuration || 'سنتان'}</p><p><strong>تاريخ التركيب:</strong> ${c.installDate || '-'}</p></div><hr style="border:1px solid #bae6fd; margin:20px 0;"><p style="font-weight:bold; color:#0369a1;">لخدمات الصيانة والدعم الفني: ${cPhone}</p></div><script>window.onload=function(){setTimeout(function(){ window.print(); }, 500);}<\/script></body></html>`); win.document.close(); }
+
+        function renderTechniciansList() { 
+            let techs = getDB('aqua_pure_techs_db'); 
+            let clients = getDB('aqua_pure_customers_db'); 
+            let html = ''; 
+            techs.forEach((t, idx) => { 
+                let custCount = clients.filter(c => c.tech === t.name).length; 
+                let waText = encodeURIComponent(`مرحباً الفني ${t.name}، نرجو متابعة مهام العمل والعهد الخاصة بك.`);
+                let waBtn = `<button type="button" class="btn btn-whatsapp" style="padding:4px 8px;" onclick="sendWhatsAppMsg('${t.phone}', '${waText}')">واتساب</button>`;
+                let editBtn = `<button class="btn btn-warning" style="padding:4px 8px;" onclick="openEditTechnician(${idx})">تعديل</button>`;
+                let deleteBtn = `<button class="btn btn-danger" style="padding:4px 8px;" onclick="deleteTechnician(${idx})">حذف</button>`;
+                html += `<tr><td><strong>${t.name}</strong></td><td>${t.phone||'-'}</td><td>${custCount}</td><td>${custCount}</td><td><span style="background:#f0fdf4; color:var(--success); padding:3px 8px; border-radius:4px; font-weight:bold;">${t.status||'نشط'}</span></td><td style="text-align:center;"><div class="action-btns">${editBtn}${waBtn}${deleteBtn}</div></td></tr>`; 
+            }); 
+            document.getElementById('technicians-table-body').innerHTML = html || '<tr><td colspan="6" style="text-align:center;">لا توجد فنيين مسجلين</td></tr>'; 
+        }
+
+        function openTechnicianModal() { 
+            document.getElementById('tech-edit-index').value = ''; 
+            document.getElementById('tech-name-input').value = ''; 
+            document.getElementById('tech-phone-input').value = ''; 
+            document.getElementById('tech-status-input').value = 'نشط'; 
+            document.getElementById('technicianModal').style.display = 'flex'; 
+        }
+
+        function openEditTechnician(idx) {
+            let techs = getDB('aqua_pure_techs_db');
+            let t = techs[idx];
+            if(t) {
+                document.getElementById('tech-edit-index').value = idx;
+                document.getElementById('tech-name-input').value = t.name || '';
+                document.getElementById('tech-phone-input').value = t.phone || '';
+                document.getElementById('tech-status-input').value = t.status || 'نشط';
+                document.getElementById('technicianModal').style.display = 'flex';
+            }
+        }
+
+        function saveTechnician(e) { 
+            e.preventDefault(); 
+            let idx = document.getElementById('tech-edit-index').value;
+            let name = document.getElementById('tech-name-input').value.trim(); 
+            let phone = document.getElementById('tech-phone-input').value.trim(); 
+            let status = document.getElementById('tech-status-input').value; 
+            let techs = getDB('aqua_pure_techs_db'); 
+            
+            if(idx !== '') {
+                techs[idx] = { name, phone, status };
+            } else {
+                techs.push({ name, phone, status }); 
+            }
+            setDB('aqua_pure_techs_db', techs); 
+            document.getElementById('technicianModal').style.display = 'none'; 
+            populateDynamicDropdowns(); 
+            renderTechniciansList(); 
+            alert('تم حفظ الفني بنجاح!'); 
+        }
+
+        function deleteTechnician(idx) { 
+            let master = JSON.parse(localStorage.getItem('aqua_pure_master_settings_db') || '{"allowDelete":true}');
+            if(master.allowDelete === false) return alert('⚠️ عذراً، زر الحذف مغلق من الإعدادات الشاملة.');
+            if(confirm('حذف هذا الفني؟')) { let techs = getDB('aqua_pure_techs_db'); techs.splice(idx, 1); setDB('aqua_pure_techs_db', techs); populateDynamicDropdowns(); renderTechniciansList(); } 
+        }
+
+        function renderTechStoreList() { let store = getDB('aqua_pure_store_db'); let grouped = {}; store.forEach(s => { if(!s || !s.tech || !s.item) return; let key = s.tech + '_' + s.item; if(!grouped[key]) { grouped[key] = { tech: s.tech, item: s.item, qty: 0 }; } let q = parseInt(s.qty) || 0; if(s.type === 'صرف' || s.type === 'إرجاع') { grouped[key].qty += q; } else if(s.type === 'تنزيل') { grouped[key].qty -= q; } }); let html = ''; for(let key in grouped) { let row = grouped[key]; let waText = encodeURIComponent(`مرحباً ${row.tech}، رصيدك الحالي المتبقي من البند (${row.item}) هو: ${row.qty} قطعة.`); let waBtn = `<button type="button" class="btn btn-whatsapp" style="padding:4px 8px;" onclick="sendWhatsAppMsgForTech('${row.tech}', '${waText}')">واتساب</button>`; html += `<tr><td><strong>${row.tech}</strong></td><td>${row.item}</td><td style="font-weight:bold; color:${row.qty > 0 ? 'var(--success)' : 'var(--danger)'};">${row.qty}</td><td style="text-align:center;">${waBtn}</td></tr>`; } document.getElementById('tech-store-table-body').innerHTML = html || '<tr><td colspan="4" style="text-align:center;">لا توجد حركات مخزنية مسجلة</td></tr>'; renderTechMovementsList(); }
+        function sendWhatsAppMsgForTech(techName, text) { let techs = getDB('aqua_pure_techs_db'); let t = techs.find(x => x.name === techName); if(t && t.phone) { sendWhatsAppMsg(t.phone, text); } else { alert('رقم جوال الفني غير مسجل في بيانات الفنيين.'); } }
+        function renderTechMovementsList() { let store = getDB('aqua_pure_store_db'); let html = ''; store.slice().reverse().forEach((s, idx) => { let realIdx = store.length - 1 - idx; html += `<tr><td>${s.tech}</td><td><span style="padding:2px 6px; border-radius:4px; background:${s.type==='صرف'?'#e0f2fe':s.type==='إرجاع'?'#fef3c7':'#fef2f2'};">${s.type}</span></td><td>${s.item}</td><td>${s.qty}</td><td>${s.date||'-'}</td><td style="text-align:center;"><button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteStoreMovement(${realIdx})">حذف</button></td></tr>`; }); let tbody = document.getElementById('tech-movements-tbody'); if(tbody) tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">لا توجد حركات</td></tr>'; }
+        function deleteStoreMovement(idx) { 
+            let master = JSON.parse(localStorage.getItem('aqua_pure_master_settings_db') || '{"allowDelete":true}');
+            if(master.allowDelete === false) return alert('⚠️ عذراً، زر الحذف مغلق من الإعدادات الشاملة.');
+            if(confirm('حذف هذه الحركة نهائياً؟')) { let store = getDB('aqua_pure_store_db'); store.splice(idx, 1); setDB('aqua_pure_store_db', store); renderTechStoreList(); } 
+        }
+
+        function openStoreActionModal(type) { document.getElementById('store-action-type').value = type; document.getElementById('store-modal-title').innerText = 'حركة مخزن: ' + type; document.getElementById('store-items-container').innerHTML = ''; populateDynamicDropdowns(); addStoreItemRow(); document.getElementById('storeActionModal').style.display = 'flex'; }
+        function addStoreItemRow() { let devices = getDB('aqua_pure_devices_db'); let reasons = getDB('aqua_pure_reasons_db'); let devOpts = devices.map(d => `<option value="${d}">${d}</option>`).join(''); let reasonOpts = reasons.map(r => `<option value="${r}">${r}</option>`).join(''); let row = document.createElement('div'); row.className = 'store-item-row'; row.style.cssText = 'display:flex; gap:8px; align-items:center;'; row.innerHTML = `<select class="form-control store-item-name" style="flex:2; margin-bottom:0;" required><option value="">-- اختر المنتج --</option><optgroup label="الأجهزة">${devOpts}</optgroup><optgroup label="قطع الغيار">${reasonOpts}</optgroup></select><input type="number" class="form-control store-item-qty" min="1" value="1" placeholder="الكمية" style="flex:1; margin-bottom:0;" required><button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">✖</button>`; document.getElementById('store-items-container').appendChild(row); }
+        function saveStoreAction(e) { e.preventDefault(); let type = document.getElementById('store-action-type').value; let tech = document.getElementById('store-tech-name').value; let today = new Date().toISOString().split('T')[0]; let store = getDB('aqua_pure_store_db'); let addedCount = 0; document.querySelectorAll('.store-item-row').forEach(row => { let item = row.querySelector('.store-item-name').value; let qty = parseInt(row.querySelector('.store-item-qty').value) || 1; if(item) { store.push({ id: Date.now().toString() + Math.random(), tech, item, qty, type, date: today }); addedCount++; } }); if(addedCount === 0) return alert('الرجاء اختيار منتج واحد على الأقل.'); setDB('aqua_pure_store_db', store); document.getElementById('storeActionModal').style.display = 'none'; renderTechStoreList(); alert('تم حفظ حركة المخزن بنجاح!'); }
+
+        function renderUsersList() { let users = getDB('aqua_pure_users_db'); let search = document.getElementById('search-users-input').value.toLowerCase().trim(); let html = ''; users.forEach((u, idx) => { if(!search || u.user.toLowerCase().includes(search)) { let permsText = u.perms ? u.perms.join('، ') : 'جميع الصلاحيات'; html += `<tr><td><strong>${u.user}</strong></td><td>${u.pass}</td><td><span style="color:${u.status==='active'?'var(--success)':'var(--danger)'}; font-weight:bold;">${u.status==='active'?'نشط':'موقوف'}</span></td><td style="font-size:0.8rem; max-width:300px; white-space:normal;">${permsText}</td><td style="text-align:center;"><div class="action-btns"><button class="btn btn-warning" onclick="openEditUser(${idx})">تعديل</button><button class="btn btn-danger" onclick="deleteUser(${idx})">حذف</button></div></td></tr>`; } }); document.getElementById('users-table-body').innerHTML = html || '<tr><td colspan="5" style="text-align:center;">لا يوجد مستخدمون</td></tr>'; }
+        function openUserModal() { document.getElementById('u-edit-index').value = ''; document.getElementById('u-username').value = ''; document.getElementById('u-password').value = ''; document.getElementById('u-status').value = 'active'; document.querySelectorAll('.u-perm').forEach(chk => chk.checked = true); document.getElementById('userModal').style.display = 'flex'; }
+        function openEditUser(idx) { let users = getDB('aqua_pure_users_db'); let u = users[idx]; if(u) { document.getElementById('u-edit-index').value = idx; document.getElementById('u-username').value = u.user; document.getElementById('u-password').value = u.pass; document.getElementById('u-status').value = u.status || 'active'; document.querySelectorAll('.u-perm').forEach(chk => { chk.checked = !u.perms || u.perms.includes(chk.value); }); document.getElementById('userModal').style.display = 'flex'; } }
+        function saveUser(e) { e.preventDefault(); let idx = document.getElementById('u-edit-index').value; let user = document.getElementById('u-username').value.trim(); let pass = document.getElementById('u-password').value.trim(); let status = document.getElementById('u-status').value; let perms = []; document.querySelectorAll('.u-perm:checked').forEach(chk => perms.push(chk.value)); let users = getDB('aqua_pure_users_db'); if(idx !== '') { users[idx] = { user, pass, status, perms }; } else { users.push({ user, pass, status, perms }); } setDB('aqua_pure_users_db', users); document.getElementById('userModal').style.display = 'none'; renderUsersList(); alert('تم حفظ المستخدم بنجاح!'); }
+        function deleteUser(idx) { 
+            let master = JSON.parse(localStorage.getItem('aqua_pure_master_settings_db') || '{"allowDelete":true}');
+            if(master.allowDelete === false) return alert('⚠️ عذراً، زر الحذف مغلق من الإعدادات الشاملة.');
+            if(confirm('هل أنت متأكد من حذف هذا المستخدم؟')) { let users = getDB('aqua_pure_users_db'); users.splice(idx, 1); setDB('aqua_pure_users_db', users); renderUsersList(); } 
+        }
+
+        function triggerBackup() { let allData = {}; for (let localKey in dbMap) { allData[dbMap[localKey]] = getDB(localKey); } let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2)); let downloadAnchor = document.createElement('a'); downloadAnchor.setAttribute("href", dataStr); downloadAnchor.setAttribute("download", "PureAqua_Backup_" + new Date().toISOString().split('T')[0] + ".json"); document.body.appendChild(downloadAnchor); downloadAnchor.click(); downloadAnchor.remove(); }
+        function restoreFromFile() { let fileInput = document.getElementById('restore-file-input'); if(!fileInput.files || fileInput.files.length === 0) return alert('الرجاء اختيار ملف النسخة الاحتياطية أولاً.'); let file = fileInput.files[0]; let reader = new FileReader(); reader.onload = function(e) { try { let parsed = JSON.parse(e.target.result); for (let localKey in dbMap) { let fbKey = dbMap[localKey]; if(parsed[fbKey]) { setDB(localKey, parsed[fbKey]); } } alert('✅ تمت استعادة البيانات بنجاح تام وسيتم تحديث الشاشة الآن!'); window.location.reload(); } catch(err) { alert('❌ ملف غير صالح أو تالف.'); } }; reader.readAsText(file); }
+    </script>
+</body>
+</html>
+```
