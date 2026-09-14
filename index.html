@@ -1,1 +1,85 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>نظام إدارة المبيعات والضريبة</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>لوحة تحكم النظام</h1>
+
+        <!-- لوحة التحكم الإدارية -->
+        <div class="admin-panel">
+            <h3>الإجراءات الإدارية</h3>
+            <button class="btn btn-warning" onclick="generateTaxReport(prompt('من تاريخ (YYYY-MM-DD):'), prompt('إلى تاريخ (YYYY-MM-DD):'))">استخراج تقرير الضريبة</button>
+            <button class="btn btn-dark" onclick="archiveOldInvoices(prompt('أرشفة الفواتير التي قبل تاريخ: (YYYY-MM-DD)'))">أرشفة الفواتير القديمة</button>
+        </div>
+
+        <!-- جدول البيانات -->
+        <table id="salesTable">
+            <thead>
+                <tr>
+                    <th>التاريخ</th>
+                    <th>العميل</th>
+                    <th>الإجمالي</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; direction: rtl; padding: 20px; }
+.container { max-width: 900px; margin: auto; }
+table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; }
+th, td { padding: 12px; text-align: center; border-bottom: 1px solid #ddd; }
+th { background-color: #2c3e50; color: white; }
+.admin-panel { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; color: white; margin: 5px; }
+.btn-warning { background-color: #f39c12; }
+.btn-dark { background-color: #34495e; }
+// إعداد Firebase (ضع بياناتك هنا)
+const firebaseConfig = {
+    databaseURL: "YOUR_FIREBASE_DATABASE_URL"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// دالة تقرير الضريبة
+async function generateTaxReport(fromDate, toDate) {
+    const snapshot = await db.ref('customers').once('value');
+    const allOps = snapshot.val() ? Object.values(snapshot.val()) : [];
+    const filtered = allOps.filter(op => op.date >= fromDate && op.date <= toDate);
+    
+    let totalSales = filtered.reduce((sum, op) => sum + parseFloat(op.totalAmount || 0), 0);
+    const taxAmount = totalSales * (15 / 115);
+    const netSales = totalSales - taxAmount;
+
+    alert(`تقرير الضريبة:
+    إجمالي المبيعات: ${totalSales.toFixed(2)}
+    صافي المبيعات: ${netSales.toFixed(2)}
+    قيمة الضريبة (15%): ${taxAmount.toFixed(2)}`);
+}
+
+// دالة الأرشفة
+async function archiveOldInvoices(dateThreshold) {
+    if(!confirm("سيتم أرشفة البيانات القديمة؟")) return;
+    const snapshot = await db.ref('customers').once('value');
+    const data = snapshot.val();
+    
+    for (let id in data) {
+        if (data[id].date < dateThreshold) {
+            await db.ref('archive/' + id).set(data[id]);
+            await db.ref('customers/' + id).remove();
+        }
+    }
+    alert("تمت الأرشفة بنجاح!");
+}
 
