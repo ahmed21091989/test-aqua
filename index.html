@@ -281,7 +281,16 @@
                 <div id="tech-store" class="tab-content">
                     <div style="display: flex; justify-content: space-between; align-items:center; flex-wrap:wrap; margin-bottom: 15px; gap:10px;">
                         <h2 style="font-size: 1.4rem; color: var(--primary-dark); margin:0;">📦 مخزن الفنيين</h2>
-                        <div style="display: flex; gap: 8px; flex-wrap:wrap;"><button class="btn btn-success" onclick="openStoreActionModal('صرف')">🔄 صرف</button><button class="btn btn-warning" onclick="openStoreActionModal('إرجاع')">↩️ إرجاع</button><button class="btn btn-secondary" onclick="openStoreActionModal('تنزيل')">⬇️ تنزيل</button><button class="btn" style="background:#3b82f6;" onclick="alert('لعرض المنتجات والكميات المتبقية، انظر للجدول بالأسفل مباشرة.')">🛍️ المنتجات</button><button class="btn" style="background:#6366f1;" onclick="document.getElementById('techMovementsModal').style.display='flex'">📊 الحركات</button><button class="btn btn-secondary" onclick="window.print()">🖨️ طباعة</button></div>
+                        <div style="display: flex; gap: 8px; flex-wrap:wrap;">
+                            <button class="btn btn-success" onclick="openStoreActionModal('صرف')">🔄 صرف</button>
+                            <button class="btn btn-warning" onclick="openStoreActionModal('إرجاع')">↩️ إرجاع</button>
+                            <button class="btn btn-secondary" onclick="openStoreActionModal('تنزيل')">⬇️ تنزيل</button>
+                            <button class="btn btn-danger" onclick="resetEntireStore()">🗑️ تصفير المخزن بالكامل</button>
+                            <button class="btn btn-warning" onclick="resetSpecificTechStore()">🧹 تصفير عهدة فني</button>
+                            <button class="btn" style="background:#3b82f6;" onclick="alert('لعرض المنتجات والكميات المتبقية، انظر للجدول بالأسفل مباشرة.')">🛍️ المنتجات</button>
+                            <button class="btn" style="background:#6366f1;" onclick="document.getElementById('techMovementsModal').style.display='flex'">📊 الحركات</button>
+                            <button class="btn btn-secondary" onclick="window.print()">🖨️ طباعة</button>
+                        </div>
                     </div>
                     <div class="card" style="padding: 0;"><div class="table-responsive"><table><thead><tr><th>الفني</th><th>المنتج / السبب</th><th>الكمية المتبقية</th><th style="text-align:center;">الإجراءات</th></tr></thead><tbody id="tech-store-table-body"></tbody></table></div></div>
                 </div>
@@ -638,7 +647,6 @@
 
         function openTechProductivityModal() { populateDynamicDropdowns(); let today = new Date(); let monthStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0'); document.getElementById('prod-month').value = monthStr; document.getElementById('prod-install-rate').value = "0"; document.getElementById('prod-maint-rate').value = "0"; document.getElementById('prod-base-salary').value = "0"; document.getElementById('techProductivityModal').style.display = 'flex'; calculateTechProductivity(); }
         
-        // دالة حساب الإنتاجية والراتب محدثة مع الراتب الأساسي
         function calculateTechProductivity() { 
             let tech = document.getElementById('prod-tech-select').value; 
             let monthVal = document.getElementById('prod-month').value; 
@@ -1075,6 +1083,33 @@
         }
 
         function renderTechStoreList() { let store = getDB('aqua_pure_store_db'); let grouped = {}; store.forEach(s => { if(!s || !s.tech || !s.item) return; let key = s.tech + '_' + s.item; if(!grouped[key]) { grouped[key] = { tech: s.tech, item: s.item, qty: 0 }; } let q = parseInt(s.qty) || 0; if(s.type === 'صرف' || s.type === 'إرجاع') { grouped[key].qty += q; } else if(s.type === 'تنزيل') { grouped[key].qty -= q; } }); let html = ''; for(let key in grouped) { let row = grouped[key]; let waText = encodeURIComponent(`مرحباً ${row.tech}، رصيدك الحالي المتبقي من البند (${row.item}) هو: ${row.qty} قطعة.`); let waBtn = `<button type="button" class="btn btn-whatsapp" style="padding:4px 8px;" onclick="sendWhatsAppMsgForTech('${row.tech}', '${waText}')">واتساب</button>`; html += `<tr><td><strong>${row.tech}</strong></td><td>${row.item}</td><td style="font-weight:bold; color:${row.qty > 0 ? 'var(--success)' : 'var(--danger)'};">${row.qty}</td><td style="text-align:center;">${waBtn}</td></tr>`; } document.getElementById('tech-store-table-body').innerHTML = html || '<tr><td colspan="4" style="text-align:center;">لا توجد حركات مخزنية مسجلة</td></tr>'; renderTechMovementsList(); }
+        
+        function resetEntireStore() {
+            if(confirm('⚠️ تحذير شديد: هل أنت متأكد من تصفير المخزن بالكامل وحذف جميع الحركات؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                setDB('aqua_pure_store_db', []);
+                renderTechStoreList();
+                alert('✅ تم تصفير المخزن بالكامل بنجاح.');
+            }
+        }
+
+        function resetSpecificTechStore() {
+            let techs = getDB('aqua_pure_techs_db');
+            if(techs.length === 0) return alert('لا توجد فنيين مسجلين.');
+            let techNames = techs.map(t => t.name).join('\n');
+            let chosenTech = prompt('أدخل اسم الفني المراد تصفير عهدته تماماً:\n\n' + techNames);
+            if(!chosenTech) return;
+            chosenTech = chosenTech.trim();
+            let found = techs.some(t => t.name === chosenTech);
+            if(!found) return alert('❌ اسم الفني غير صحيح.');
+            if(confirm(`⚠️ هل أنت متأكد من تصفير عهدة الفني (${chosenTech}) بالكامل بعد الجرد؟`)) {
+                let store = getDB('aqua_pure_store_db');
+                store = store.filter(s => s.tech !== chosenTech);
+                setDB('aqua_pure_store_db', store);
+                renderTechStoreList();
+                alert(`✅ تم تصفير عهدة الفني (${chosenTech}) بنجاح.`);
+            }
+        }
+
         function sendWhatsAppMsgForTech(techName, text) { let techs = getDB('aqua_pure_techs_db'); let t = techs.find(x => x.name === techName); if(t && t.phone) { sendWhatsAppMsg(t.phone, text); } else { alert('رقم جوال الفني غير مسجل في بيانات الفنيين.'); } }
         function renderTechMovementsList() { let store = getDB('aqua_pure_store_db'); let html = ''; store.slice().reverse().forEach((s, idx) => { let realIdx = store.length - 1 - idx; html += `<tr><td>${s.tech}</td><td><span style="padding:2px 6px; border-radius:4px; background:${s.type==='صرف'?'#e0f2fe':s.type==='إرجاع'?'#fef3c7':'#fef2f2'};">${s.type}</span></td><td>${s.item}</td><td>${s.qty}</td><td>${s.date||'-'}</td><td style="text-align:center;"><button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteStoreMovement(${realIdx})">حذف</button></td></tr>`; }); let tbody = document.getElementById('tech-movements-tbody'); if(tbody) tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">لا توجد حركات</td></tr>'; }
         function deleteStoreMovement(idx) { 
@@ -1090,7 +1125,7 @@
         function renderUsersList() { let users = getDB('aqua_pure_users_db'); let search = document.getElementById('search-users-input').value.toLowerCase().trim(); let html = ''; users.forEach((u, idx) => { if(!search || u.user.toLowerCase().includes(search)) { let permsText = u.perms ? u.perms.join('، ') : 'جميع الصلاحيات'; html += `<tr><td><strong>${u.user}</strong></td><td>${u.pass}</td><td><span style="color:${u.status==='active'?'var(--success)':'var(--danger)'}; font-weight:bold;">${u.status==='active'?'نشط':'موقوف'}</span></td><td style="font-size:0.8rem; max-width:300px; white-space:normal;">${permsText}</td><td style="text-align:center;"><div class="action-btns"><button class="btn btn-warning" onclick="openEditUser(${idx})">تعديل</button><button class="btn btn-danger" onclick="deleteUser(${idx})">حذف</button></div></td></tr>`; } }); document.getElementById('users-table-body').innerHTML = html || '<tr><td colspan="5" style="text-align:center;">لا يوجد مستخدمون</td></tr>'; }
         function openUserModal() { document.getElementById('u-edit-index').value = ''; document.getElementById('u-username').value = ''; document.getElementById('u-password').value = ''; document.getElementById('u-status').value = 'active'; document.querySelectorAll('.u-perm').forEach(chk => chk.checked = true); document.getElementById('userModal').style.display = 'flex'; }
         function openEditUser(idx) { let users = getDB('aqua_pure_users_db'); let u = users[idx]; if(u) { document.getElementById('u-edit-index').value = idx; document.getElementById('u-username').value = u.user; document.getElementById('u-password').value = u.pass; document.getElementById('u-status').value = u.status || 'active'; document.querySelectorAll('.u-perm').forEach(chk => { chk.checked = !u.perms || u.perms.includes(chk.value); }); document.getElementById('userModal').style.display = 'flex'; } }
-        function saveUser(e) { e.preventDefault(); let idx = document.getElementById('u-edit-index').value; let user = document.getElementById('u-username').value.trim(); let pass = document.getElementById('u-password').value.trim(); let status = document.getElementById('u-status').value; let perms = []; document.querySelectorAll('.u-perm:checked').forEach(chk => perms.push(chk.value)); let users = getDB('aqua_pure_users_db'); if(idx !== '') { users[idx] = { user, pass, status, perms }; } else { users.push({ user, pass, status, perms }); } setDB('aqua_pure_users_db', users); document.getElementById('userModal').style.display = 'none'; renderUsersList(); alert('تم حفظ المستخدم بنجاح!'); }
+        function saveUser(e) { e.preventDefault(); let idx = document.getElementById('u-edit-index').value; let user = document.getElementById('u-username').value.trim(); let pass = document.getElementById('u-password').value.trim(); let status = document.getElementById('u-status').value; let perms = []; document.querySelectorAll('.u-perm:checked').forEach(chk => perms.value); let users = getDB('aqua_pure_users_db'); if(idx !== '') { users[idx] = { user, pass, status, perms }; } else { users.push({ user, pass, status, perms }); } setDB('aqua_pure_users_db', users); document.getElementById('userModal').style.display = 'none'; renderUsersList(); alert('تم حفظ المستخدم بنجاح!'); }
         function deleteUser(idx) { 
             let master = JSON.parse(localStorage.getItem('aqua_pure_master_settings_db') || '{"allowDelete":true}');
             if(master.allowDelete === false) return alert('⚠️ عذراً، زر الحذف مغلق من الإعدادات الشاملة.');
