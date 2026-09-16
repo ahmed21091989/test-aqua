@@ -231,7 +231,7 @@
                     </div>
                 </div>
 
-                <!-- 5. تذكير الصيانات المحدث بالكامل -->
+                <!-- 5. تذكير الصيانات -->
                 <div id="maintenance-reminders" class="tab-content">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
                         <h2 style="font-size: 1.3rem; color: var(--primary-dark);">⏰ تذكير الصيانات</h2>
@@ -357,7 +357,7 @@
                     </div>
                 </div>
 
-                <!-- 13. التقارير الشاملة المحدثة -->
+                <!-- 13. التقارير الشاملة -->
                 <div id="reports" class="tab-content">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap:wrap; gap:10px;">
                         <h2 style="font-size: 1.4rem; color: var(--primary-dark);">📈 التقارير الشاملة</h2>
@@ -404,7 +404,7 @@
                             <button class="btn btn-purple" onclick="openStaffModal()">+ إضافة موظف (إداري / فني)</button>
                             <button class="btn btn-warning" onclick="openLoanModal()">💸 إضافة سلفة لموظف</button>
                             <button class="btn btn-success" onclick="openSupplierInvoiceModal()">+ إضافة فاتورة مورد</button>
-                            <button class="btn btn-danger" onclick="openExpenseModal()">+ إضافة مصروف تشغيلي</button>
+                            <button class="btn btn-danger" onclick="openExpenseModal()">+ إضافة مصاريف تشغيل</button>
                         </div>
                     </div>
 
@@ -481,9 +481,20 @@
                 </div>
 
                 <!-- 17. النسخة الاحتياطية -->
-                <div id="backup-restore" class="tab-content"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;"><h2 style="font-size: 1.4rem; color: var(--primary-dark); margin: 0;">💾 النسخة الاحتياطية</h2><button class="btn" style="background:#0284c7; color:white; padding: 6px 12px;" onclick="triggerManualCloudBackup()">☁️ إنشاء نسخة سحابية الآن</button></div><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;"><div class="card" style="margin:0; text-align:center;"><h3 style="color:#64748b; font-size:1rem;">إجمالي العملاء</h3><div id="bkp-cust-count" style="font-size:2rem; font-weight:bold; color:var(--primary-color);">0</div></div><div class="card" style="margin:0; text-align:center;"><h3 style="color:#64748b; font-size:1rem;">بطاقات الصيانة</h3><div id="bkp-maint-count" style="font-size:2rem; font-weight:bold; color:var(--success);">0</div></div><div class="card" style="margin:0; text-align:center;"><h3 style="color:#64748b; font-size:1rem;">حركات المخزن</h3><div id="bkp-store-count" style="font-size:2rem; font-weight:bold; color:var(--warning);">0</div></div></div><div class="card" style="margin-bottom: 20px;"><h3 style="color:var(--primary-dark); margin-bottom:15px;">☁️ سجل النسخ اليومي</h3><div class="table-responsive"><table><thead><tr><th>التاريخ</th><th>وقت الحفظ</th><th>الحالة</th><th>الوصف</th><th style="text-align:center;">الإجراء</th></tr></thead><tbody id="cloud-backup-log-table"></tbody></table></div></div><div class="card" style="margin-bottom: 20px;"><button class="btn btn-success" onclick="triggerBackup()">📥 تحميل نسخة احتياطية محلية (JSON)</button></div><div class="card" style="border:1px solid var(--danger);"><h3 style="color:var(--danger); margin-bottom:10px;">🔄 استرجاع البيانات</h3><div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;"><input type="file" id="restore-file-input" class="form-control" accept=".json" style="margin:0; max-width:300px;"><button class="btn btn-danger" onclick="restoreFromFile()">استرجاع</button></div></div></div>
+                <div id="backup-restore" class="tab-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                        <h2 style="font-size: 1.4rem; color: var(--primary-dark); margin: 0;">💾 النسخة الاحتياطية</h2>
+                        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                            <span style="color: #0369a1; font-weight: bold; font-size: 0.9rem; background: #e0f2fe; padding: 6px 12px; border-radius: 6px; border: 1px solid #bae6fd;">
+                                ⏰ يتم أخذ نسخة سحابية تلقائياً يومياً الساعة 12:00 منتصف الليل
+                            </span>
+                            <button class="btn" style="background:#0284c7; color:white; padding: 6px 12px;" onclick="triggerManualCloudBackup()">☁️ إنشاء نسخة سحابية الآن</button>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;"><div class="card" style="margin:0; text-align:center;"><h3 style="color:#64748b; font-size:1rem;">إجمالي العملاء</h3><div id="bkp-cust-count" style="font-size:2rem; font-weight:bold; color:var(--primary-color);">0</div></div><div class="card" style="margin:0; text-align:center;"><h3 style="color:#64748b; font-size:1rem;">بطاقات الصيانة</h3><div id="bkp-maint-count" style="font-size:2rem; font-weight:bold; color:var(--success);">0</div></div><div class="card" style="margin:0; text-align:center;"><h3 style="color:#64748b; font-size:1rem;">حركات المخزن</h3><div id="bkp-store-count" style="font-size:2rem; font-weight:bold; color:var(--warning);">0</div></div></div><div class="card" style="margin-bottom: 20px;"><h3 style="color:var(--primary-dark); margin-bottom:15px;">☁️ سجل النسخ اليومي</h3><div class="table-responsive"><table><thead><tr><th>التاريخ</th><th>وقت الحفظ</th><th>الحالة</th><th>الوصف</th><th style="text-align:center;">الإجراء</th></tr></thead><tbody id="cloud-backup-log-table"></tbody></table></div></div><div class="card" style="margin-bottom: 20px;"><button class="btn btn-success" onclick="triggerBackup()">📥 تحميل نسخة احتياطية محلية (JSON)</button></div><div class="card" style="border:1px solid var(--danger);"><h3 style="color:var(--danger); margin-bottom:10px;">🔄 استرجاع البيانات</h3><div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;"><input type="file" id="restore-file-input" class="form-control" accept=".json" style="margin:0; max-width:300px;"><button class="btn btn-danger" onclick="restoreFromFile()">استرجاع</button></div></div>
+                </div>
 
-                <!-- 18. الإعدادات الشاملة (التحكم المطلق - إعادة جميع الأيقونات والخيارات) -->
+                <!-- 18. الإعدادات الشاملة (التحكم المطلق) -->
                 <div id="master-settings" class="tab-content">
                     <h2 style="font-size: 1.4rem; color: var(--primary-dark); margin-bottom: 20px;">⚙️ الإعدادات الشاملة والتحكم المطلق في السيستم</h2>
                     <div class="card">
@@ -506,7 +517,6 @@
                             <textarea id="master-invoice-notes" class="form-control" rows="3" placeholder="أدخل الشروط أو ملاحظات الضمان التي ستظهر بالفاتورة..."></textarea>
                         </div>
 
-                        <!-- إعادة جميع أقسام القائمة الجانبية كاملة كما كانت -->
                         <div style="margin-bottom: 20px;">
                             <label style="font-weight: bold; color: var(--primary-dark); display: block; margin-bottom: 8px;">👁️ التحكم في ظهور الأقسام في القائمة الجانبية:</label>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1;">
@@ -613,9 +623,10 @@
         <div class="modal-content" style="max-width: 650px;">
             <h3 style="margin-bottom: 15px; color: var(--primary-dark);">📄 كشف حساب وراتب الموظف</h3>
             <div id="staff-report-body-content"></div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; flex-wrap: wrap;">
                 <button type="button" class="btn btn-secondary" onclick="document.getElementById('staffSalaryReportModal').style.display='none'">إغلاق</button>
-                <button type="button" class="btn btn-success" onclick="printIndividualSalarySlip()">🖨️ طباعة المسير</button>
+                <button type="button" class="btn btn-whatsapp" onclick="sendIndividualSalaryWhatsApp()">📲 إرسال على الواتساب</button>
+                <button type="button" class="btn btn-success" onclick="printIndividualSalarySlip()">🖨️ طباعة المسير (PDF)</button>
             </div>
         </div>
     </div>
@@ -837,8 +848,53 @@
         if(!sysSettings) { sysSettings = { nameAr: "شركة بيور أكوا لتحلية المياه النقية", nameEn: "Pure Aqua KSA", cr: "", tax: "", unifiedNumber: "", nationalId: "", city: "", street: "", buildingNo: "", postalCode: "", address: "", locationGps: "", phone1: "", phone2: "", additionalInfo: "", logoBase64: "" }; setDB('aqua_pure_sys_settings_db', sysSettings); }
         let currentModalMode = 'device';
 
+        // ضبط النسخ الاحتياطي التلقائي اليومي الساعة 12:00 منتصف الليل
+        function setupMidnightAutoBackup() {
+            let now = new Date();
+            let night = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate() + 1, // منتصف الليل القادم
+                0, 0, 0
+            );
+            let msToMidnight = night.getTime() - now.getTime();
+
+            // فحص إذا كان تم بالفعل حفظ نسخة اليوم
+            let todayStr = now.toISOString().split('T')[0];
+            let lastAutoDate = localStorage.getItem('last_auto_backup_date');
+            if(lastAutoDate !== todayStr && now.getHours() === 0) {
+                executeAutoCloudBackup(todayStr);
+            }
+
+            setTimeout(function() {
+                executeAutoCloudBackup(new Date().toISOString().split('T')[0]);
+                setInterval(function() {
+                    executeAutoCloudBackup(new Date().toISOString().split('T')[0]);
+                }, 24 * 60 * 60 * 1000);
+            }, msToMidnight);
+        }
+
+        function executeAutoCloudBackup(dateStr) {
+            let backupId = dateStr + '_AutoMidnight_' + Date.now().toString().slice(-4);
+            let allData = {};
+            for (let k in dbMap) {
+                if (k !== 'aqua_pure_backup_logs_db') allData[dbMap[k]] = getDB(k);
+            }
+            database.ref('backups/' + backupId).set(allData).then(() => {
+                let logs = getDB('aqua_pure_backup_logs_db');
+                logs.unshift({ id: backupId, time: '12:00:00 ص', status: 'نجاح تلقائي', desc: 'نسخة سحابية يومية مجدولة (الساعة 12:00 منتصف الليل)' });
+                setDB('aqua_pure_backup_logs_db', logs);
+                localStorage.setItem('last_auto_backup_date', dateStr);
+                renderBackupLogs();
+                logUserActivity("النسخ الاحتياطي", `تم إنشاء نسخة سحابية تلقائية منتصف الليل (${backupId})`);
+            }).catch(err => {
+                console.error("Auto backup error:", err);
+            });
+        }
+
         window.addEventListener('load', () => {
             loadMasterSettingsUI(); 
+            setupMidnightAutoBackup();
             let loggedIn = localStorage.getItem('logged_in'); 
             let currentUserName = localStorage.getItem('current_user_name'); 
             let currentUserPerms = JSON.parse(localStorage.getItem('current_user_perms') || JSON.stringify(defaultPerms));
@@ -1330,6 +1386,27 @@
             alert('✅ تم حفظ بيانات الموظف بنجاح!');
         }
 
+        function deleteStaffMember(id) {
+            let master = JSON.parse(localStorage.getItem('aqua_pure_master_settings_db') || '{"allowDelete":true}');
+            if(master.allowDelete === false) return alert('⚠️ زر الحذف مغلق من الإعدادات الشاملة.');
+            let staffList = getDB('aqua_pure_staff_db');
+            let staff = staffList.find(s => s.id === id);
+            if(!staff) return;
+            if(confirm(`هل أنت متأكد من حذف الموظف (${staff.name}) نهائياً؟`)) {
+                let newStaff = staffList.filter(s => s.id !== id);
+                setDB('aqua_pure_staff_db', newStaff);
+                // حذف سلف الموظف إن وجدت
+                let loans = getDB('aqua_pure_loans_db').filter(l => l.staffName !== staff.name);
+                setDB('aqua_pure_loans_db', loans);
+                logUserActivity("شؤون الموظفين", `حذف الموظف: ${staff.name}`);
+                populateDynamicDropdowns();
+                renderStaffTable();
+                renderLoansTable();
+                renderFinancials();
+                alert('تم حذف الموظف بنجاح.');
+            }
+        }
+
         function renderStaffTable() {
             let staff = getDB('aqua_pure_staff_db');
             let loans = getDB('aqua_pure_loans_db');
@@ -1348,8 +1425,11 @@
                         <td style="color:var(--danger); font-weight:bold;">${totalEmpLoans.toFixed(2)} SAR</td>
                         <td style="color:var(--success); font-weight:bold;">${netPayable.toFixed(2)} SAR</td>
                         <td style="text-align:center;">
-                            <button class="btn btn-info" style="padding:4px 8px;" onclick="viewStaffSalarySlip('${s.id}')">📄 مسير الراتب</button>
-                            <button class="btn btn-warning" style="padding:4px 8px;" onclick="openStaffModal('${s.id}')">تعديل</button>
+                            <div class="action-btns">
+                                <button class="btn btn-info" style="padding:4px 8px;" onclick="viewStaffSalarySlip('${s.id}')">📄 مسير الراتب</button>
+                                <button class="btn btn-warning" style="padding:4px 8px;" onclick="openStaffModal('${s.id}')">تعديل</button>
+                                <button class="btn btn-danger" style="padding:4px 8px;" onclick="deleteStaffMember('${s.id}')">حذف</button>
+                            </div>
                         </td>
                     </tr>`;
                 }
@@ -1446,13 +1526,41 @@
                 <div style="display:flex; justify-content:space-around; margin:15px 0; background:#f8fafc; padding:10px; border:1px solid #ddd;">
                     <div>الأساسي: <strong>${s.baseSalary} SAR</strong></div>
                     <div>السُلف: <strong style="color:red;">${totalLoans.toFixed(2)} SAR</strong></div>
-                    <div>الصافي: <strong style="color:green;">${net.toFixed(2)} SAR</strong></div>
+                    <div>الصافي المستحق: <strong style="color:green;">${net.toFixed(2)} SAR</strong></div>
                 </div>
                 <h4>تفاصيل السُلف:</h4>
                 <table><thead><tr><th>التاريخ</th><th>السبب</th><th>المبلغ</th></tr></thead><tbody>${loansRows || '<tr><td colspan="3">لا توجد سلف</td></tr>'}</tbody></table>
                 <div style="margin-top:50px; display:flex; justify-content:space-between;"><p>توقيع الموظف: ..................</p><p>اعتماد الإدارة: ..................</p></div>
                 <script>window.onload=function(){window.print();}<\/script></body></html>`);
             win.document.close();
+        }
+
+        function sendIndividualSalaryWhatsApp() {
+            if(!currentActiveSalarySlipStaff) return;
+            let s = currentActiveSalarySlipStaff;
+            let loans = getDB('aqua_pure_loans_db').filter(l => l.staffName === s.name);
+            let totalLoans = loans.reduce((sum, l) => sum + (parseFloat(l.amount) || 0), 0);
+            let net = (parseFloat(s.baseSalary) || 0) - totalLoans;
+            let cName = sysSettings.nameAr || 'شركة بيور أكوا لتحلية المياه النقية';
+
+            let msg = `*${cName}*\n`;
+            msg += `*كشف حساب ومسير الراتب الفردي*\n`;
+            msg += `━━━━━━━━━━━━━━━━━━━\n`;
+            msg += `👤 *الموظف:* ${s.name}\n`;
+            msg += `💼 *الصفة:* ${s.type}\n`;
+            msg += `💵 *الراتب الأساسي:* ${s.baseSalary} SAR\n`;
+            msg += `💸 *إجمالي السُلف:* ${totalLoans.toFixed(2)} SAR\n`;
+            msg += `💰 *صافي الراتب المستحق:* ${net.toFixed(2)} SAR\n`;
+            msg += `━━━━━━━━━━━━━━━━━━━\n`;
+            if(loans.length > 0) {
+                msg += `*بيان السُلف المسجلة:*\n`;
+                loans.forEach((l, idx) => {
+                    msg += `${idx+1}- بتاريخ ${l.date}: ${l.amount} SAR (${l.reason || 'سلفة'})\n`;
+                });
+                msg += `━━━━━━━━━━━━━━━━━━━\n`;
+            }
+            msg += `تم استخراج الكشف بتاريخ: ${new Date().toLocaleDateString('ar-SA')}`;
+            sendWhatsAppMsg(s.phone, encodeURIComponent(msg));
         }
 
         // حفظ بيانات العميل والصيانة مع الكميات وسعر الوحدة التلقائي
@@ -1764,6 +1872,18 @@
             if(document.getElementById('expenses-table-body')) document.getElementById('expenses-table-body').innerHTML = expHtml || `<tr><td colspan="5" style="text-align:center;">لا توجد مصروفات</td></tr>`; 
         }
 
+        function openExpenseModal() {
+            let today = new Date().toISOString().split('T')[0];
+            let expDateEl = document.getElementById('exp-date');
+            if(expDateEl) expDateEl.value = today;
+            let expDescEl = document.getElementById('exp-desc');
+            if(expDescEl) expDescEl.value = '';
+            let expAmtEl = document.getElementById('exp-amount');
+            if(expAmtEl) expAmtEl.value = '';
+            let modal = document.getElementById('expenseModal');
+            if(modal) modal.style.display = 'flex';
+        }
+
         function saveExpense(e) { 
             e.preventDefault(); 
             let date = document.getElementById('exp-date').value; 
@@ -1772,8 +1892,10 @@
             let exps = getDB('aqua_pure_expenses_db'); 
             exps.push({ id: Date.now().toString(), date, desc, amount, user: getCurrentUser() }); 
             setDB('aqua_pure_expenses_db', exps); 
+            logUserActivity("المصروفات", `إضافة مصروف تشغيلي بقيمة ${amount} SAR: ${desc}`);
             document.getElementById('expenseModal').style.display = 'none'; 
             renderFinancials(); 
+            alert('تم حفظ المصروف بنجاح!');
         }
 
         function deleteExpense(id) { 
