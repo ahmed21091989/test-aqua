@@ -21,7 +21,7 @@
         .login-box { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 400px; text-align: center; }
         .login-box h2 { color: var(--primary-dark); margin-bottom: 25px; font-size: 1.6rem; }
         
-        /* تنسيقات بوابة العميل */
+        /* تنسيقات بوابة العميل الذاتية */
         #customer-portal-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #f8fafc; z-index: 10000; display: none; flex-direction: column; overflow-y: auto; }
         .portal-header { background: #0369a1; padding: 20px; color: #fff; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .portal-content { padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; }
@@ -97,7 +97,7 @@
 </head>
 <body>
 
-    <!-- بوابة العميل الذاتية (الواجهة الجديدة) -->
+    <!-- بوابة العميل الذاتية (الواجهة الرقمية) -->
     <div id="customer-portal-screen">
         <div id="portal-login-view" style="display:flex; height:100vh; align-items:center; justify-content:center; background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);">
             <div class="portal-login-box">
@@ -274,7 +274,8 @@
                         </div>
                     </div>
                 </div>
-<!-- 3.1 قسم التركيبات وحسابات الشركات الخارجية الجديد والمطور -->
+
+                <!-- 3.1 قسم التركيبات وحسابات الشركات الخارجية -->
                 <div id="external-installations" class="tab-content">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                         <h2 style="font-size: 1.4rem; color: var(--primary-dark); margin: 0;">🤝 التركيبات وحسابات الشركات الخارجية</h2>
@@ -303,7 +304,7 @@
                             <option value="all">كل الفترات</option>
                             <option value="today">اليوم</option>
                             <option value="this_week">هذا الأسبوع</option>
-                            <option value="current_month">الش الشهر الحالي</option>
+                            <option value="current_month">الشهر الحالي</option>
                             <option value="custom">تاريخ مخصص...</option>
                         </select>
                         <input type="date" id="ext-filter-from" class="form-control" style="display:none; margin-bottom:0;" onchange="renderExternalInstallsList()">
@@ -338,8 +339,7 @@
                         <div id="external-installs-pagination" class="pagination-container"></div>
                     </div>
                 </div>
-
-                <!-- 4. الصيانات -->
+<!-- 4. الصيانات -->
                 <div id="maintenance-cards" class="tab-content">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap:wrap; gap:10px;">
                         <h2 style="font-size: 1.4rem; color: var(--primary-dark);">📋 بطاقات الصيانات</h2>
@@ -1149,8 +1149,18 @@
         </div>
     </div>
 <script>
-        const firebaseConfig = { apiKey: "AIzaSyB3V8AKCIawXT3zME2UhJ_Zt1_QdFPb0uM", authDomain: "pure-aqua-ksa.firebaseapp.com", databaseURL: "https://pure-aqua-ksa-default-rtdb.firebaseio.com", projectId: "pure-aqua-ksa", storageBucket: "pure-aqua-ksa.firebasestorage.app", messagingSenderId: "118967743337", appId: "1:118967743337:web:cd5142fb93016ddc38c3f8", measurementId: "G-XTE35CZEEG" };
-        firebase.initializeApp(firebaseConfig); const database = firebase.database();
+        const firebaseConfig = { 
+            apiKey: "AIzaSyB3V8AKCIawXT3zME2UhJ_Zt1_QdFPb0uM", 
+            authDomain: "pure-aqua-ksa.firebaseapp.com", 
+            databaseURL: "https://pure-aqua-ksa-default-rtdb.firebaseio.com", 
+            projectId: "pure-aqua-ksa", 
+            storageBucket: "pure-aqua-ksa.firebasestorage.app", 
+            messagingSenderId: "118967743337", 
+            appId: "1:118967743337:web:cd5142fb93016ddc38c3f8", 
+            measurementId: "G-XTE35CZEEG" 
+        };
+        firebase.initializeApp(firebaseConfig); 
+        const database = firebase.database();
         
         const dbMap = { 
             'aqua_pure_customers_db': 'customers', 
@@ -1188,8 +1198,7 @@
                 } 
                 if (needsRender) {
                     populateDynamicDropdowns();
-                    // تحديث الإعدادات السحابية والشعار فور وصولها
-                    loadSystemSettingsUI();
+                    loadSystemSettingsUI(); // تحديث الإعدادات السحابية والشعار فور وصولها
                     if (document.getElementById('main-app').style.display === 'flex') {
                         renderAllActive(); 
                     }
@@ -1209,7 +1218,7 @@
             try { 
                 let data = JSON.parse(localStorage.getItem(key)); 
                 if (key === 'aqua_pure_sys_settings_db' || key === 'aqua_pure_master_settings_db') {
-                    return data || {}; // إرجاع كائن للإعدادات وعدم تحويله لمصفوفة
+                    return data || {}; 
                 }
                 if (data && typeof data === 'object' && !Array.isArray(data)) { 
                     data = Object.values(data); 
@@ -1273,6 +1282,9 @@
             return true;
         }
 
+        // ==========================================
+        // إعدادات الشاشة الرئيسية (اللوحة)
+        // ==========================================
         let homeCurrentPeriod = 'all', homeCustomFrom = '', homeCustomTo = '';
 
         function openHomePeriodModal() {
@@ -1378,7 +1390,15 @@
             }
         }
 
-        function updateBackupCounters() { let clients = getDB('aqua_pure_customers_db'); let store = getDB('aqua_pure_store_db'); let maintCount = clients.filter(c => c && c.nextMaint).length; if(document.getElementById('bkp-cust-count')) document.getElementById('bkp-cust-count').innerText = clients.length; if(document.getElementById('bkp-maint-count')) document.getElementById('bkp-maint-count').innerText = maintCount; if(document.getElementById('bkp-store-count')) document.getElementById('bkp-store-count').innerText = store.length; }
+        function updateBackupCounters() { 
+            let clients = getDB('aqua_pure_customers_db'); 
+            let store = getDB('aqua_pure_store_db'); 
+            let maintCount = clients.filter(c => c && c.nextMaint).length; 
+            if(document.getElementById('bkp-cust-count')) document.getElementById('bkp-cust-count').innerText = clients.length; 
+            if(document.getElementById('bkp-maint-count')) document.getElementById('bkp-maint-count').innerText = maintCount; 
+            if(document.getElementById('bkp-store-count')) document.getElementById('bkp-store-count').innerText = store.length; 
+        }
+
         function formatPhone(phone) { if(!phone) return ''; let p = phone.toString().trim().replace(/\D/g, ''); if(p.startsWith('0')) return '966' + p.substring(1); if(!p.startsWith('966') && p.length === 9) return '966' + p; return p; }
         function sendWhatsAppMsg(phone, text) { if(!phone) return alert('لا يوجد رقم جوال مسجل.'); let p = formatPhone(phone); window.open(`https://wa.me/${p}?text=${text}`, '_blank'); }
 
@@ -1435,12 +1455,16 @@
             `;
         }
 
+        // ===============================================
+        // النسخ الاحتياطي التلقائي منتصف الليل
+        // ===============================================
         function setupMidnightAutoBackup() {
             let now = new Date();
             let night = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
             let msToMidnight = night.getTime() - now.getTime();
             let todayStr = now.toISOString().split('T')[0];
             let lastAutoDate = localStorage.getItem('last_auto_backup_date');
+            
             if(lastAutoDate !== todayStr && now.getHours() === 0) { executeAutoCloudBackup(todayStr); }
             setTimeout(function() {
                 executeAutoCloudBackup(new Date().toISOString().split('T')[0]);
@@ -1454,12 +1478,79 @@
             for (let k in dbMap) { if (k !== 'aqua_pure_backup_logs_db') allData[dbMap[k]] = getDB(k); }
             database.ref('backups/' + backupId).set(allData).then(() => {
                 let logs = getDB('aqua_pure_backup_logs_db');
-                logs.unshift({ id: backupId, time: '12:00:00 ص', status: 'نجاح تلقائي', desc: 'نسخة سحابية يومية مجدولة (الساعة 12:00 منتصف الليل)' });
+                logs.unshift({ id: backupId, time: '12:00:00 ص', status: 'نجاح تلقائي', desc: 'نسخة سحابية يومية مجدولة' });
                 setDB('aqua_pure_backup_logs_db', logs);
                 localStorage.setItem('last_auto_backup_date', dateStr);
                 renderBackupLogs();
                 logUserActivity("النسخ الاحتياطي", `تم إنشاء نسخة سحابية تلقائية منتصف الليل (${backupId})`);
             }).catch(err => { console.error("Auto backup error:", err); });
+        }
+
+        // ===============================================
+        // نظام استرجاع وأخذ النسخة الاحتياطية
+        // ===============================================
+        function triggerBackup() { 
+            let allData = {}; 
+            for (let k in dbMap) allData[dbMap[k]] = getDB(k); 
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2)); 
+            let a = document.createElement('a'); 
+            a.setAttribute("href", dataStr); 
+            a.setAttribute("download", "PureAqua_Backup_" + new Date().toISOString().split('T')[0] + ".json"); 
+            document.body.appendChild(a); 
+            a.click(); 
+            a.remove(); 
+        }
+
+        function triggerManualCloudBackup() {
+            let backupId = new Date().toISOString().split('T')[0] + '_Manual_' + Date.now().toString().slice(-4);
+            let allData = {}; 
+            for (let k in dbMap) if(k !== 'aqua_pure_backup_logs_db') allData[dbMap[k]] = getDB(k);
+            database.ref('backups/' + backupId).set(allData).then(() => {
+                let logs = getDB('aqua_pure_backup_logs_db');
+                logs.unshift({ id: backupId, time: new Date().toLocaleTimeString('ar-SA'), status: 'نجاح', desc: 'نسخة سحابية يدوية' });
+                setDB('aqua_pure_backup_logs_db', logs);
+                renderBackupLogs();
+                alert('تم أخذ النسخة السحابية بنجاح!');
+            });
+        }
+
+        function renderBackupLogs() {
+            let logs = getDB('aqua_pure_backup_logs_db'), html = '';
+            logs.forEach(l => {
+                html += `<tr><td>${l.id}</td><td>${l.time}</td><td>${l.status}</td><td>${l.desc||'-'}</td><td style="text-align:center;"><button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteBackupLog('${l.id}')">حذف</button></td></tr>`;
+            });
+            let tbody = document.getElementById('cloud-backup-log-table');
+            if(tbody) tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">لا توجد نسخ</td></tr>';
+        }
+
+        function deleteBackupLog(id) { setDB('aqua_pure_backup_logs_db', getDB('aqua_pure_backup_logs_db').filter(l => l.id !== id)); renderBackupLogs(); }
+
+        function restoreFromFile() {
+            let f = document.getElementById('restore-file-input').files[0];
+            if(!f) return alert('اختر ملف النسخة أولاً (JSON)');
+            let r = new FileReader();
+            r.onload = function(e){
+                try {
+                    let p = JSON.parse(e.target.result);
+                    let hasData = false;
+                    for (let k in dbMap) {
+                        if(p[dbMap[k]] !== undefined) {
+                            setDB(k, p[dbMap[k]]);
+                            hasData = true;
+                        }
+                    }
+                    if(hasData) {
+                        logUserActivity("النسخ الاحتياطي", "استرجاع نسخة احتياطية من ملف محلي");
+                        alert('تم استرجاع البيانات السحابية بنجاح! سيتم إعادة تحميل الصفحة.');
+                        window.location.reload();
+                    } else {
+                        alert('الملف المرفوع لا يحتوي على بيانات متوافقة مع هذا النظام.');
+                    }
+                } catch(err){
+                    alert('الملف تالف أو غير صالح للاسترجاع.');
+                }
+            };
+            r.readAsText(f);
         }
 
         // ===============================================
@@ -1471,7 +1562,7 @@
             document.getElementById('customer-portal-screen').style.display = 'flex';
             document.getElementById('portal-login-view').style.display = 'flex';
             document.getElementById('portal-dashboard-view').style.display = 'none';
-            loadSystemSettingsUI(); // تحميل اللوجو في البوابة
+            loadSystemSettingsUI(); // تحميل اللوجو
         }
 
         function handlePortalLogin() {
@@ -1537,7 +1628,7 @@
                             <div style="font-size:0.85rem; color:#15803d;">التاريخ: ${date}</div>
                             <div style="font-size:0.85rem; color:#15803d; margin-top:5px;">القيمة: <strong style="font-size:1.1rem;">${total} SAR</strong></div>
                         </div>
-                        <button class="btn btn-success" onclick="printCustomerInvoice('${c.code}')">🖨️ عرض الفاتورة (PDF)</button>
+                        <button class="btn btn-success" onclick="printCustomerInvoice('${c.code}')">🖨️ عرض الفاتورة</button>
                     </div>`;
                 }
             });
@@ -1555,6 +1646,9 @@
             window.open(`https://wa.me/${formatPhone(supportPhone)}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
+        // ===============================================
+        // تهيئة النظام عند التحميل وربط QR البوابة
+        // ===============================================
         window.addEventListener('load', () => {
             initializeDefaultCloudData();
             loadMasterSettingsUI(); 
@@ -1563,14 +1657,14 @@
             let repSelect = document.getElementById('rep-filter-period');
             if(repSelect && !repSelect.querySelector('option[value="custom"]')) { repSelect.insertAdjacentHTML('beforeend', '<option value="custom">[تحديد فترة]</option>'); }
 
-            // التحقق من وجود رقم العميل في الرابط (توجيه QR Code) للبوابة الرقمية
+            // التوجيه التلقائي للبوابة عند قراءة الـ QR Code من الفاتورة
             let urlParams = new URLSearchParams(window.location.search);
             let portalPhone = urlParams.get('portalPhone');
             if(portalPhone) {
                 openCustomerPortal();
                 document.getElementById('portal-phone-input').value = portalPhone;
                 setTimeout(() => { handlePortalLogin(); }, 500);
-                return; // إيقاف التحميل العادي للإدارة وبدء البوابة مباشرة
+                return; // إيقاف التحميل العادي وبدء البوابة للعميل
             }
 
             let loggedIn = localStorage.getItem('logged_in'); 
@@ -1586,11 +1680,20 @@
                 populateDynamicDropdowns(); 
                 switchTab('home', document.querySelector('.nav-links li[data-target="home"]')); 
             } else {
-                loadSystemSettingsUI(); // تحميل اللوجو في شاشة الدخول
+                loadSystemSettingsUI(); // لضمان ظهور اللوجو في شاشة تسجيل الدخول
             }
         });
-
-        function toggleMobileMenu() { let aside = document.getElementById('sidebar-menu'); let overlay = document.getElementById('mobile-overlay'); if(aside.classList.contains('open')) { aside.classList.remove('open'); overlay.classList.remove('open'); } else { aside.classList.add('open'); overlay.classList.add('open'); } }
+function toggleMobileMenu() { 
+            let aside = document.getElementById('sidebar-menu'); 
+            let overlay = document.getElementById('mobile-overlay'); 
+            if(aside.classList.contains('open')) { 
+                aside.classList.remove('open'); 
+                overlay.classList.remove('open'); 
+            } else { 
+                aside.classList.add('open'); 
+                overlay.classList.add('open'); 
+            } 
+        }
 
         function handleLogin(e) {
             e.preventDefault(); 
@@ -1648,19 +1751,25 @@
             let tab = document.getElementById(tabId);
             if(tab) tab.classList.add('active'); 
             if(element) element.classList.add('active'); 
-            else { let t = document.querySelector(`.nav-links li[data-target="${tabId}"]`); if(t) t.classList.add('active'); } 
-            if(window.innerWidth <= 768) { document.getElementById('sidebar-menu').classList.remove('open'); document.getElementById('mobile-overlay').classList.remove('open'); } 
+            else { 
+                let t = document.querySelector(`.nav-links li[data-target="${tabId}"]`); 
+                if(t) t.classList.add('active'); 
+            } 
+            if(window.innerWidth <= 768) { 
+                document.getElementById('sidebar-menu').classList.remove('open'); 
+                document.getElementById('mobile-overlay').classList.remove('open'); 
+            } 
             renderAllActive(); 
         }
 
         function loadSystemSettingsUI() {
             let s = getDB('aqua_pure_sys_settings_db');
+            if(!s || Object.keys(s).length === 0) s = { nameAr: "شركة بيور أكوا لتحلية المياه النقية", nameEn: "Pure Aqua KSA" };
             let nAr = s.nameAr || "شركة بيور أكوا لتحلية المياه النقية"; 
             let nEn = s.nameEn || "Pure Aqua KSA";
             if(document.getElementById('sidebar-company-name')) document.getElementById('sidebar-company-name').innerHTML = `${nAr}<br><span style="font-size:0.85rem; color:#bae6fd;">${nEn}</span>`; 
             if(document.getElementById('header-phone')) document.getElementById('header-phone').innerText = "الدعم: " + (s.phone1 || "");
             
-            // حقن اللوجو
             if(s.logoBase64) { 
                 if(document.getElementById('sidebar-logo')) { document.getElementById('sidebar-logo').src = s.logoBase64; document.getElementById('sidebar-logo').style.display = 'block'; }
                 if(document.getElementById('login-logo-img')) { document.getElementById('login-logo-img').src = s.logoBase64; document.getElementById('login-logo-img').style.display = 'block'; }
@@ -1678,6 +1787,7 @@
         function saveSystemSettings(e) {
             e.preventDefault();
             let s = getDB('aqua_pure_sys_settings_db');
+            if(!s || Object.keys(s).length === 0) s = {};
             s.nameAr = document.getElementById('sys-name-ar').value;
             s.nameEn = document.getElementById('sys-name-en').value;
             s.cr = document.getElementById('sys-cr').value;
@@ -1764,12 +1874,14 @@
             else return { text: `قادمة (${diff})`, color: '#22c55e', t: 'upcoming' }; 
         }
 
+        // ===============================================
+        // طباعة فاتورة العميل وإصدار QR البوابة الرقمية
+        // ===============================================
         function printCustomerInvoice(code) { 
             let c = getDB('aqua_pure_customers_db').find(i => String(i.code) === String(code)); 
             if(!c) return; 
             let master = getDB('aqua_pure_master_settings_db');
             let invoiceNotes = master.invoiceNotes ? `<div style="background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #cbd5e1; margin-top:20px; font-size:0.85rem;"><strong>شروط وملاحظات:</strong><br>${master.invoiceNotes.replace(/\n/g, '<br>')}</div>` : '';
-            let sys = getDB('aqua_pure_sys_settings_db');
             
             let header = getCompanyHeaderHTML('فاتورة ضريبية مبسطة');
             let invoiceTotal = parseFloat(c.totalValue) || parseFloat(c.lastMaintValue) || 0;
@@ -1777,7 +1889,7 @@
             let vatAmount = (invoiceTotal - subTotal).toFixed(2);
             let invoiceDateStr = c.installDate || c.lastMaint || '-'; 
             
-            // توليد رابط وتشفير الـ QR Code ليوجه العميل للبوابة الذاتية برقم جواله
+            // توليد الرابط المباشر للبوابة الرقمية وإرفاق رقم الجوال
             let currentUrl = window.location.href.split('?')[0];
             let portalUrl = `${currentUrl}?portalPhone=${c.phone}`;
             let qrImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(portalUrl)}`;
@@ -1797,13 +1909,16 @@
                 </div>
                 ${invoiceNotes}
                 <div style="text-align:center; margin-top:30px;">
-                    <p style="font-size:0.9rem; color:#64748b; margin-bottom:5px;">امسح الكود لمتابعة حسابك وفواتيرك وضمانك</p>
+                    <p style="font-size:0.9rem; color:#64748b; margin-bottom:5px;">امسح الكود لمتابعة حسابك وفواتيرك وضمانك مباشرة</p>
                     <img src="${qrImageSrc}" style="width:130px; height:130px; border:2px solid #0369a1; border-radius:8px; padding:5px;">
                 </div>
                 <script>window.onload=function(){window.print();}<\/script></body></html>`); 
             win.document.close(); 
         }
 
+        // ===============================================
+        // دوال إضافة وتعديل العملاء والصيانة
+        // ===============================================
         function saveCustomerAndMaintenance(e) {
             e.preventDefault(); 
             let code = document.getElementById('c-code').value; 
@@ -2049,18 +2164,34 @@
             document.getElementById('maintenance-cards-body').innerHTML = html || '<tr><td colspan="12" style="text-align:center;">لا توجد بطاقات صيانة</td></tr>'; 
             renderPaginationControls('maintenance-pagination', maintCurrentPage, totalPages, (p) => { maintCurrentPage = p; renderMaintenanceCards(); });
         }
-
-        function renderFinancials() {
+function renderFinancials() {
             let filter = document.getElementById('fin-period-filter') ? document.getElementById('fin-period-filter').value : 'current_month'; 
-            let clients = getDB('aqua_pure_customers_db'); let exps = getDB('aqua_pure_expenses_db'); let suppInvoices = getDB('aqua_pure_supplier_invoices_db'); let loans = getDB('aqua_pure_loans_db');
+            let clients = getDB('aqua_pure_customers_db'); 
+            let exps = getDB('aqua_pure_expenses_db'); 
+            let suppInvoices = getDB('aqua_pure_supplier_invoices_db'); 
+            let loans = getDB('aqua_pure_loans_db');
+            
             let totalRev = 0; 
-            clients.forEach(c => { if(isDateInFilter(c.installDate, filter)) totalRev += (parseFloat(c.totalValue) || 0); if(isDateInFilter(c.lastMaint, filter)) totalRev += (parseFloat(c.lastMaintValue) || 0); }); 
+            clients.forEach(c => { 
+                if(isDateInFilter(c.installDate, filter)) totalRev += (parseFloat(c.totalValue) || 0); 
+                if(isDateInFilter(c.lastMaint, filter)) totalRev += (parseFloat(c.lastMaintValue) || 0); 
+            }); 
 
             let totalSupp = 0, suppHtml = ''; 
-            suppInvoices.slice().reverse().forEach(inv => { if(isDateInFilter(inv.date, filter)) { totalSupp += parseFloat(inv.totalAmount) || 0; suppHtml += `<tr><td>${inv.date}</td><td>${inv.supplierName}</td><td style="color:var(--primary-color); font-weight:bold;">${inv.totalAmount}</td><td><span class="badge-user">${inv.user||'Admin'}</span></td></tr>`; } }); 
+            suppInvoices.slice().reverse().forEach(inv => { 
+                if(isDateInFilter(inv.date, filter)) { 
+                    totalSupp += parseFloat(inv.totalAmount) || 0; 
+                    suppHtml += `<tr><td>${inv.date}</td><td>${inv.supplierName}</td><td style="color:var(--primary-color); font-weight:bold;">${inv.totalAmount}</td><td><span class="badge-user">${inv.user||'Admin'}</span></td></tr>`; 
+                } 
+            }); 
 
             let totalExp = 0, expHtml = ''; 
-            exps.slice().reverse().forEach(x => { if(isDateInFilter(x.date, filter)) { totalExp += parseFloat(x.amount) || 0; expHtml += `<tr><td>${x.date}</td><td>${x.desc}</td><td style="color:var(--danger); font-weight:bold;">${x.amount}</td><td><span class="badge-user">${x.user||'Admin'}</span></td><td style="text-align:center;"><button class="btn btn-danger" style="padding:2px 8px;" onclick="deleteExpense('${x.id}')">حذف</button></td></tr>`; } }); 
+            exps.slice().reverse().forEach(x => { 
+                if(isDateInFilter(x.date, filter)) { 
+                    totalExp += parseFloat(x.amount) || 0; 
+                    expHtml += `<tr><td>${x.date}</td><td>${x.desc}</td><td style="color:var(--danger); font-weight:bold;">${x.amount}</td><td><span class="badge-user">${x.user||'Admin'}</span></td><td style="text-align:center;"><button class="btn btn-danger" style="padding:2px 8px;" onclick="deleteExpense('${x.id}')">حذف</button></td></tr>`; 
+                } 
+            }); 
 
             let totalLoans = loans.filter(l => isDateInFilter(l.date, filter)).reduce((sum, l) => sum + (parseFloat(l.amount) || 0), 0);
 
@@ -2076,80 +2207,335 @@
             if(document.getElementById('expenses-table-body')) document.getElementById('expenses-table-body').innerHTML = expHtml || `<tr><td colspan="5" style="text-align:center;">لا توجد مصروفات</td></tr>`; 
         }
 
-        function openExpenseModal() { let today = new Date().toISOString().split('T')[0]; let expDateEl = document.getElementById('exp-date'); if(expDateEl) expDateEl.value = today; let expDescEl = document.getElementById('exp-desc'); if(expDescEl) expDescEl.value = ''; let expAmtEl = document.getElementById('exp-amount'); if(expAmtEl) expAmtEl.value = ''; let modal = document.getElementById('expenseModal'); if(modal) modal.style.display = 'flex'; }
-        function saveExpense(e) { e.preventDefault(); let date = document.getElementById('exp-date').value; let desc = document.getElementById('exp-desc').value.trim(); let amount = parseFloat(document.getElementById('exp-amount').value) || 0; let exps = getDB('aqua_pure_expenses_db'); exps.push({ id: Date.now().toString(), date, desc, amount, user: getCurrentUser() }); setDB('aqua_pure_expenses_db', exps); logUserActivity("المصروفات", `إضافة مصروف تشغيلي بقيمة ${amount} SAR: ${desc}`); document.getElementById('expenseModal').style.display = 'none'; renderFinancials(); alert('تم حفظ المصروف بنجاح سحابياً!'); }
-        function deleteExpense(id) { if(confirm('حذف هذا المصروف؟')) { let exps = getDB('aqua_pure_expenses_db').filter(x => String(x.id) !== String(id)); setDB('aqua_pure_expenses_db', exps); renderFinancials(); } }
+        function openExpenseModal() {
+            let today = new Date().toISOString().split('T')[0];
+            let expDateEl = document.getElementById('exp-date');
+            if(expDateEl) expDateEl.value = today;
+            let expDescEl = document.getElementById('exp-desc');
+            if(expDescEl) expDescEl.value = '';
+            let expAmtEl = document.getElementById('exp-amount');
+            if(expAmtEl) expAmtEl.value = '';
+            let modal = document.getElementById('expenseModal');
+            if(modal) modal.style.display = 'flex';
+        }
 
-        function openSupplierInvoiceModal() { document.getElementById('supp-inv-code').value = 'SUP-' + Math.floor(1000 + Math.random() * 9000); document.getElementById('supp-inv-date').value = new Date().toISOString().split('T')[0]; document.getElementById('supp-inv-name').value = ''; document.getElementById('supp-items-container').innerHTML = ''; addSupplierItemRow(); document.getElementById('supplierInvoiceModal').style.display = 'flex'; }
-        function addSupplierItemRow() { let devices = getDB('aqua_pure_devices_db'); let reasons = getDB('aqua_pure_reasons_db'); let devOpts = devices.map(d => `<option value="${d}">${d}</option>`).join(''); let reasonOpts = reasons.map(r => `<option value="${r}">${r}</option>`).join(''); let row = document.createElement('div'); row.className = 'supp-item-row'; row.style.cssText = 'display:flex; gap:8px; align-items:center; margin-bottom:5px;'; row.innerHTML = `<select class="form-control supp-item-type" style="flex:2; margin-bottom:0;" required><option value="">-- اختر --</option><optgroup label="الأجهزة">${devOpts}</optgroup><optgroup label="القطع">${reasonOpts}</optgroup></select><input type="number" class="form-control supp-qty-input" min="1" value="1" placeholder="الكمية" style="flex:1; margin-bottom:0;" oninput="calculateSuppTotal()"><input type="number" step="0.01" class="form-control supp-price-input" min="0" value="0" placeholder="السعر" style="flex:1; margin-bottom:0;" oninput="calculateSuppTotal()"><button type="button" class="btn btn-danger" onclick="this.parentElement.remove(); calculateSuppTotal();">✖</button>`; document.getElementById('supp-items-container').appendChild(row); calculateSuppTotal(); }
-        function calculateSuppTotal() { let total = 0; document.querySelectorAll('.supp-item-row').forEach(row => { let qty = parseFloat(row.querySelector('.supp-qty-input').value) || 0; let price = parseFloat(row.querySelector('.supp-price-input').value) || 0; total += (qty * price); }); document.getElementById('supp-invoice-total').innerText = total.toFixed(2); }
-        function saveSupplierInvoice(e) { e.preventDefault(); let code = document.getElementById('supp-inv-code').value.trim(); let date = document.getElementById('supp-inv-date').value; let supplierName = document.getElementById('supp-inv-name').value.trim(); let notes = document.getElementById('supp-inv-notes').value.trim(); let itemsSummaryArr = [], totalAmount = 0; document.querySelectorAll('.supp-item-row').forEach(row => { let itemName = row.querySelector('.supp-item-type').value; let qty = parseInt(row.querySelector('.supp-qty-input').value) || 1; let price = parseFloat(row.querySelector('.supp-price-input').value) || 0; let lineTotal = qty * price; totalAmount += lineTotal; if(itemName) itemsSummaryArr.push(`${itemName} (${qty})`); }); let supplierInvoices = getDB('aqua_pure_supplier_invoices_db'); supplierInvoices.push({ id: Date.now().toString(), code, date, supplierName, itemsSummary: itemsSummaryArr.join('، '), totalAmount, notes, user: getCurrentUser() }); setDB('aqua_pure_supplier_invoices_db', supplierInvoices); document.getElementById('supplierInvoiceModal').style.display = 'none'; renderSupplierPurchases(); if(document.getElementById('financials').classList.contains('active')) renderFinancials(); alert('تم حفظ فاتورة المورد بنجاح سحابياً!'); }
-        function renderSupplierPurchases() { let invoices = getDB('aqua_pure_supplier_invoices_db'); let tbody = document.getElementById('supplier-invoices-tbody'); let totalEl = document.getElementById('supp-total-purchases'); let html = '', total = 0; invoices.slice().reverse().forEach(inv => { total += parseFloat(inv.totalAmount) || 0; html += `<tr><td>${inv.code}</td><td><strong>${inv.supplierName}</strong></td><td>${inv.date}</td><td>${inv.itemsSummary}</td><td style="color:var(--primary-color); font-weight:bold;">${inv.totalAmount} SAR</td><td><span class="badge-user">${inv.user||'Admin'}</span></td><td style="text-align:center;"><button class="btn btn-danger" style="padding:4px 8px;" onclick="deleteSupplierInvoice('${inv.id}')">حذف</button></td></tr>`; }); if(tbody) tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center;">لا توجد فواتير</td></tr>'; if(totalEl) totalEl.innerText = total.toLocaleString() + ' SAR'; }
-        function deleteSupplierInvoice(id) { if(confirm('حذف هذه الفاتورة؟')) { setDB('aqua_pure_supplier_invoices_db', getDB('aqua_pure_supplier_invoices_db').filter(i => String(i.id) !== String(id))); renderSupplierPurchases(); if(document.getElementById('financials').classList.contains('active')) renderFinancials(); } }
+        function saveExpense(e) { 
+            e.preventDefault(); 
+            let date = document.getElementById('exp-date').value; 
+            let desc = document.getElementById('exp-desc').value.trim(); 
+            let amount = parseFloat(document.getElementById('exp-amount').value) || 0; 
+            let exps = getDB('aqua_pure_expenses_db'); 
+            exps.push({ id: Date.now().toString(), date, desc, amount, user: getCurrentUser() }); 
+            setDB('aqua_pure_expenses_db', exps); 
+            logUserActivity("المصروفات", `إضافة مصروف تشغيلي بقيمة ${amount} SAR: ${desc}`); 
+            document.getElementById('expenseModal').style.display = 'none'; 
+            renderFinancials(); 
+            alert('تم حفظ المصروف بنجاح سحابياً!');
+        }
 
-        function deleteClientByCode(code) { let master = getDB('aqua_pure_master_settings_db'); if(master.allowDelete === false) return alert('⚠️ زر الحذف مغلق.'); if(confirm('حذف هذا العميل؟')) { setDB('aqua_pure_customers_db', getDB('aqua_pure_customers_db').filter(c => String(c.code) !== String(code))); logUserActivity("العملاء", `حذف كود: ${code}`); renderAllActive(); } }
-        function getNextCustomerCode() { let clients = getDB('aqua_pure_customers_db'); let maxCode = 100; clients.forEach(c => { let n = parseInt(c.code); if(!isNaN(n) && n > maxCode) maxCode = n; }); return (maxCode + 1).toString(); }
-        function getNextQuoteCode() { let quotes = getDB('aqua_pure_quotes_db'); let maxCode = 1000; quotes.forEach(q => { let n = parseInt(q.code); if(!isNaN(n) && n > maxCode) maxCode = n; }); return (maxCode + 1).toString(); }
-        function autoCalculateNextCustomerMaint(val) { let master = getDB('aqua_pure_master_settings_db'); if(master.freeDates || !val) return; let d = new Date(val); d.setMonth(d.getMonth() + 6); document.getElementById('c-next-maint-input').value = d.toISOString().split('T')[0]; }
-        function autoCalculateNextMaintenance(val) { let master = getDB('aqua_pure_master_settings_db'); if(master.freeDates || !val) return; let d = new Date(val); d.setMonth(d.getMonth() + 6); document.getElementById('c-next-maint').value = d.toISOString().split('T')[0]; }
-        function setNextMaintByMonths(mId, tId, sId) { let m = parseInt(document.getElementById(mId).value); if(isNaN(m) || m <= 0) return; let s = document.getElementById(sId).value; let d = s ? new Date(s) : new Date(); d.setMonth(d.getMonth() + m); document.getElementById(tId).value = d.toISOString().split('T')[0]; }
-        function isDateInFilter(dStr, fStr) { if(!dStr) return false; let d = new Date(dStr), today = new Date(); if(fStr === 'all') return true; if(fStr === 'today') return d.toDateString() === today.toDateString(); if(fStr === 'current_month') return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear(); if(fStr === 'custom') { let f = document.getElementById('fin-date-from').value, t = document.getElementById('fin-date-to').value; if(!f || !t) return true; return d >= new Date(f) && d <= new Date(t); } return true; }
-        function handleFinancialFilterChange() { let f = document.getElementById('fin-period-filter').value; let dF = document.getElementById('fin-date-from'), dT = document.getElementById('fin-date-to'); if(f === 'custom') { dF.style.display = 'inline-block'; dT.style.display = 'inline-block'; } else { dF.style.display = 'none'; dT.style.display = 'none'; } renderFinancials(); }
-        function renderPaginationControls(cId, cp, tp, cb) { let c = document.getElementById(cId); if(!c) return; if(tp <= 1) { c.innerHTML = ''; return; } let h = ''; if(cp > 1) h += `<button class="pagination-btn" onclick="(${cb.toString()})(${cp - 1})">« السابق</button>`; for(let i = 1; i <= tp; i++) { if(i === 1 || i === tp || (i >= cp - 2 && i <= cp + 2)) { h += `<button class="pagination-btn ${i===cp?'active':''}" onclick="(${cb.toString()})(${i})">${i}</button>`; } } if(cp < tp) h += `<button class="pagination-btn" onclick="(${cb.toString()})(${cp + 1})">التالي »</button>`; c.innerHTML = h; }
-        function cancelMaintenance() { if(confirm('إيقاف الصيانة نهائياً؟')) { let clients = getDB('aqua_pure_customers_db'); let c = clients.find(i => String(i.code) === String(document.getElementById('maint-target-code').value)); if(c) { c.nextMaint = ""; setDB('aqua_pure_customers_db', clients); } document.getElementById('maintenanceModal').style.display = 'none'; renderAllActive(); } }
-        function resetMaintenance() { if(confirm('تصفير صيانات العميل؟')) { let clients = getDB('aqua_pure_customers_db'); let c = clients.find(i => String(i.code) === String(document.getElementById('maint-target-code').value)); if(c) { c.nextMaint = ""; c.lastMaintValue = 0; setDB('aqua_pure_customers_db', clients); } document.getElementById('maintenanceModal').style.display = 'none'; renderAllActive(); } }
-        function quickMaintenanceVisit() { let last = localStorage.getItem('last_active_customer_code') || ''; let s = prompt("🔍 أدخل كود العميل أو رقم الجوال:", last); if(!s || !s.trim()) return; s = s.trim(); let c = getDB('aqua_pure_customers_db').find(x => String(x.code) === s || String(x.phone) === s); if(c) { localStorage.setItem('last_active_customer_code', c.code); openMaintenanceCardByCode(c.code); } else { alert("❌ لم يتم العثور على عميل."); } }
+        function deleteExpense(id) { 
+            if(confirm('حذف هذا المصروف؟')) { 
+                let exps = getDB('aqua_pure_expenses_db').filter(x => String(x.id) !== String(id)); 
+                setDB('aqua_pure_expenses_db', exps); 
+                renderFinancials(); 
+            } 
+        }
+
+        function openSupplierInvoiceModal() { 
+            document.getElementById('supp-inv-code').value = 'SUP-' + Math.floor(1000 + Math.random() * 9000); 
+            document.getElementById('supp-inv-date').value = new Date().toISOString().split('T')[0]; 
+            document.getElementById('supp-inv-name').value = ''; 
+            document.getElementById('supp-items-container').innerHTML = ''; 
+            addSupplierItemRow(); 
+            document.getElementById('supplierInvoiceModal').style.display = 'flex'; 
+        }
+
+        function addSupplierItemRow() { 
+            let devices = getDB('aqua_pure_devices_db'); 
+            let reasons = getDB('aqua_pure_reasons_db'); 
+            let devOpts = devices.map(d => `<option value="${d}">${d}</option>`).join(''); 
+            let reasonOpts = reasons.map(r => `<option value="${r}">${r}</option>`).join(''); 
+            let row = document.createElement('div'); 
+            row.className = 'supp-item-row'; 
+            row.style.cssText = 'display:flex; gap:8px; align-items:center; margin-bottom:5px;'; 
+            row.innerHTML = `<select class="form-control supp-item-type" style="flex:2; margin-bottom:0;" required><option value="">-- اختر --</option><optgroup label="الأجهزة">${devOpts}</optgroup><optgroup label="القطع">${reasonOpts}</optgroup></select><input type="number" class="form-control supp-qty-input" min="1" value="1" placeholder="الكمية" style="flex:1; margin-bottom:0;" oninput="calculateSuppTotal()"><input type="number" step="0.01" class="form-control supp-price-input" min="0" value="0" placeholder="السعر" style="flex:1; margin-bottom:0;" oninput="calculateSuppTotal()"><button type="button" class="btn btn-danger" onclick="this.parentElement.remove(); calculateSuppTotal();">✖</button>`; 
+            document.getElementById('supp-items-container').appendChild(row); 
+            calculateSuppTotal(); 
+        }
+
+        function calculateSuppTotal() { 
+            let total = 0; 
+            document.querySelectorAll('.supp-item-row').forEach(row => { 
+                let qty = parseFloat(row.querySelector('.supp-qty-input').value) || 0; 
+                let price = parseFloat(row.querySelector('.supp-price-input').value) || 0; 
+                total += (qty * price); 
+            }); 
+            document.getElementById('supp-invoice-total').innerText = total.toFixed(2); 
+        }
+
+        function saveSupplierInvoice(e) { 
+            e.preventDefault(); 
+            let code = document.getElementById('supp-inv-code').value.trim(); 
+            let date = document.getElementById('supp-inv-date').value; 
+            let supplierName = document.getElementById('supp-inv-name').value.trim(); 
+            let notes = document.getElementById('supp-inv-notes').value.trim(); 
+            let itemsSummaryArr = [], totalAmount = 0; 
+            document.querySelectorAll('.supp-item-row').forEach(row => { 
+                let itemName = row.querySelector('.supp-item-type').value; 
+                let qty = parseInt(row.querySelector('.supp-qty-input').value) || 1; 
+                let price = parseFloat(row.querySelector('.supp-price-input').value) || 0; 
+                let lineTotal = qty * price; 
+                totalAmount += lineTotal; 
+                if(itemName) itemsSummaryArr.push(`${itemName} (${qty})`); 
+            }); 
+            let supplierInvoices = getDB('aqua_pure_supplier_invoices_db'); 
+            supplierInvoices.push({ id: Date.now().toString(), code, date, supplierName, itemsSummary: itemsSummaryArr.join('، '), totalAmount, notes, user: getCurrentUser() }); 
+            setDB('aqua_pure_supplier_invoices_db', supplierInvoices); 
+            document.getElementById('supplierInvoiceModal').style.display = 'none'; 
+            renderSupplierPurchases(); 
+            if(document.getElementById('financials').classList.contains('active')) renderFinancials(); 
+            alert('تم حفظ فاتورة المورد بنجاح سحابياً!'); 
+        }
+
+        function renderSupplierPurchases() { 
+            let invoices = getDB('aqua_pure_supplier_invoices_db'); 
+            let tbody = document.getElementById('supplier-invoices-tbody'); 
+            let totalEl = document.getElementById('supp-total-purchases'); 
+            let html = '', total = 0; 
+            invoices.slice().reverse().forEach(inv => { 
+                total += parseFloat(inv.totalAmount) || 0; 
+                html += `<tr><td>${inv.code}</td><td><strong>${inv.supplierName}</strong></td><td>${inv.date}</td><td>${inv.itemsSummary}</td><td style="color:var(--primary-color); font-weight:bold;">${inv.totalAmount} SAR</td><td><span class="badge-user">${inv.user||'Admin'}</span></td><td style="text-align:center;"><button class="btn btn-danger" style="padding:4px 8px;" onclick="deleteSupplierInvoice('${inv.id}')">حذف</button></td></tr>`; 
+            }); 
+            if(tbody) tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center;">لا توجد فواتير</td></tr>'; 
+            if(totalEl) totalEl.innerText = total.toLocaleString() + ' SAR'; 
+        }
+
+        function deleteSupplierInvoice(id) { 
+            if(confirm('حذف هذه الفاتورة؟')) { 
+                setDB('aqua_pure_supplier_invoices_db', getDB('aqua_pure_supplier_invoices_db').filter(i => String(i.id) !== String(id))); 
+                renderSupplierPurchases(); 
+                if(document.getElementById('financials').classList.contains('active')) renderFinancials(); 
+            } 
+        }
+
+        function deleteClientByCode(code) { 
+            let master = getDB('aqua_pure_master_settings_db'); 
+            if(master.allowDelete === false) return alert('⚠️ زر الحذف مغلق.'); 
+            if(confirm('حذف هذا العميل؟')) { 
+                setDB('aqua_pure_customers_db', getDB('aqua_pure_customers_db').filter(c => String(c.code) !== String(code))); 
+                logUserActivity("العملاء", `حذف كود: ${code}`); 
+                renderAllActive(); 
+            } 
+        }
+
+        function getNextCustomerCode() { 
+            let clients = getDB('aqua_pure_customers_db'); 
+            let maxCode = 100; 
+            clients.forEach(c => { let n = parseInt(c.code); if(!isNaN(n) && n > maxCode) maxCode = n; }); 
+            return (maxCode + 1).toString(); 
+        }
+
+        function getNextQuoteCode() { 
+            let quotes = getDB('aqua_pure_quotes_db'); 
+            let maxCode = 1000; 
+            quotes.forEach(q => { let n = parseInt(q.code); if(!isNaN(n) && n > maxCode) maxCode = n; }); 
+            return (maxCode + 1).toString(); 
+        }
+
+        function autoCalculateNextCustomerMaint(val) { 
+            let master = getDB('aqua_pure_master_settings_db'); 
+            if(master.freeDates || !val) return; 
+            let d = new Date(val); 
+            d.setMonth(d.getMonth() + 6); 
+            document.getElementById('c-next-maint-input').value = d.toISOString().split('T')[0]; 
+        }
+
+        function autoCalculateNextMaintenance(val) { 
+            let master = getDB('aqua_pure_master_settings_db'); 
+            if(master.freeDates || !val) return; 
+            let d = new Date(val); 
+            d.setMonth(d.getMonth() + 6); 
+            document.getElementById('c-next-maint').value = d.toISOString().split('T')[0]; 
+        }
+
+        function setNextMaintByMonths(mId, tId, sId) { 
+            let m = parseInt(document.getElementById(mId).value); 
+            if(isNaN(m) || m <= 0) return; 
+            let s = document.getElementById(sId).value; 
+            let d = s ? new Date(s) : new Date(); 
+            d.setMonth(d.getMonth() + m); 
+            document.getElementById(tId).value = d.toISOString().split('T')[0]; 
+        }
+        
+        function isDateInFilter(dStr, fStr) { 
+            if(!dStr) return false; 
+            let d = new Date(dStr), today = new Date(); 
+            if(fStr === 'all') return true; 
+            if(fStr === 'today') return d.toDateString() === today.toDateString(); 
+            if(fStr === 'current_month') return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear(); 
+            if(fStr === 'custom') { 
+                let f = document.getElementById('fin-date-from').value, t = document.getElementById('fin-date-to').value; 
+                if(!f || !t) return true; 
+                return d >= new Date(f) && d <= new Date(t); 
+            } 
+            return true; 
+        }
+        
+        function handleFinancialFilterChange() { 
+            let f = document.getElementById('fin-period-filter').value; 
+            let dF = document.getElementById('fin-date-from'), dT = document.getElementById('fin-date-to'); 
+            if(f === 'custom') { dF.style.display = 'inline-block'; dT.style.display = 'inline-block'; } 
+            else { dF.style.display = 'none'; dT.style.display = 'none'; } 
+            renderFinancials(); 
+        }
+        
+        function renderPaginationControls(cId, cp, tp, cb) { 
+            let c = document.getElementById(cId); 
+            if(!c) return; 
+            if(tp <= 1) { c.innerHTML = ''; return; } 
+            let h = ''; 
+            if(cp > 1) h += `<button class="pagination-btn" onclick="(${cb.toString()})(${cp - 1})">« السابق</button>`; 
+            for(let i = 1; i <= tp; i++) { 
+                if(i === 1 || i === tp || (i >= cp - 2 && i <= cp + 2)) { h += `<button class="pagination-btn ${i===cp?'active':''}" onclick="(${cb.toString()})(${i})">${i}</button>`; } 
+            } 
+            if(cp < tp) h += `<button class="pagination-btn" onclick="(${cb.toString()})(${cp + 1})">التالي »</button>`; 
+            c.innerHTML = h; 
+        }
+        
+        function cancelMaintenance() { 
+            if(confirm('إيقاف الصيانة نهائياً؟')) { 
+                let clients = getDB('aqua_pure_customers_db'); 
+                let c = clients.find(i => String(i.code) === String(document.getElementById('maint-target-code').value)); 
+                if(c) { c.nextMaint = ""; setDB('aqua_pure_customers_db', clients); } 
+                document.getElementById('maintenanceModal').style.display = 'none'; 
+                renderAllActive(); 
+            } 
+        }
+
+        function resetMaintenance() { 
+            if(confirm('تصفير صيانات العميل؟')) { 
+                let clients = getDB('aqua_pure_customers_db'); 
+                let c = clients.find(i => String(i.code) === String(document.getElementById('maint-target-code').value)); 
+                if(c) { c.nextMaint = ""; c.lastMaintValue = 0; setDB('aqua_pure_customers_db', clients); } 
+                document.getElementById('maintenanceModal').style.display = 'none'; 
+                renderAllActive(); 
+            } 
+        }
+
+        function quickMaintenanceVisit() { 
+            let last = localStorage.getItem('last_active_customer_code') || ''; 
+            let s = prompt("🔍 أدخل كود العميل أو رقم الجوال:", last); 
+            if(!s || !s.trim()) return; 
+            s = s.trim(); 
+            let c = getDB('aqua_pure_customers_db').find(x => String(x.code) === s || String(x.phone) === s); 
+            if(c) { localStorage.setItem('last_active_customer_code', c.code); openMaintenanceCardByCode(c.code); } 
+            else { alert("❌ لم يتم العثور على عميل."); } 
+        }
 
         let chartInstance = null;
         function loadHomeStatsAndChart() {
-            let clients = getDB('aqua_pure_customers_db'), now = new Date(); let chartLabels = Array.from({length: 31}, (_, i) => (i+1).toString()); let chartValues = Array(31).fill(0); 
+            let clients = getDB('aqua_pure_customers_db'), now = new Date(); 
+            let chartLabels = Array.from({length: 31}, (_, i) => (i+1).toString()); 
+            let chartValues = Array(31).fill(0); 
+            
             let search = document.getElementById('home-search') ? document.getElementById('home-search').value.toLowerCase().trim() : "";
             let allMaintCount = 0, overdueCount = 0, nearCount = 0;
-            clients.forEach(c => { if(!c) return; if(c.nextMaint) { allMaintCount++; let st = getMaintenanceStatus(c.nextMaint); if(st.t === 'overdue') overdueCount++; if(st.t === 'near') nearCount++; } });
-            if(document.getElementById('top-stat-all-clients')) document.getElementById('top-stat-all-clients').innerText = clients.length; if(document.getElementById('top-stat-all-maint')) document.getElementById('top-stat-all-maint').innerText = allMaintCount; if(document.getElementById('top-stat-overdue')) document.getElementById('top-stat-overdue').innerText = overdueCount; if(document.getElementById('top-stat-near')) document.getElementById('top-stat-near').innerText = nearCount;
+            
+            clients.forEach(c => {
+                if(!c) return; 
+                if(c.nextMaint) { 
+                    allMaintCount++; 
+                    let st = getMaintenanceStatus(c.nextMaint); 
+                    if(st.t === 'overdue') overdueCount++; 
+                    if(st.t === 'near') nearCount++; 
+                }
+            });
+
+            if(document.getElementById('top-stat-all-clients')) document.getElementById('top-stat-all-clients').innerText = clients.length; 
+            if(document.getElementById('top-stat-all-maint')) document.getElementById('top-stat-all-maint').innerText = allMaintCount; 
+            if(document.getElementById('top-stat-overdue')) document.getElementById('top-stat-overdue').innerText = overdueCount; 
+            if(document.getElementById('top-stat-near')) document.getElementById('top-stat-near').innerText = nearCount;
 
             let periodSales = 0, periodOrders = 0, periodClientsCount = 0;
+
             let filteredForTable = clients.filter(c => {
-                if(!c) return false; let opDate = c.installDate || c.lastMaint; let dates = []; 
+                if(!c) return false;
+                let opDate = c.installDate || c.lastMaint;
+                
+                let dates = []; 
                 if(c.installDate && parseFloat(c.totalValue) > 0) dates.push({d: c.installDate, v: parseFloat(c.totalValue)}); 
                 if(c.lastMaint && parseFloat(c.lastMaintValue) > 0) dates.push({d: c.lastMaint, v: parseFloat(c.lastMaintValue)});
+                
                 let matchesPeriod = isDateInPeriod(opDate, homeCurrentPeriod, homeCustomFrom, homeCustomTo);
                 if (matchesPeriod) { periodClientsCount++; }
-                dates.forEach(dt => { if(isDateInPeriod(dt.d, homeCurrentPeriod, homeCustomFrom, homeCustomTo)) { periodSales += dt.v; periodOrders++; let d = new Date(dt.d); if(d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) { chartValues[d.getDate()-1] += dt.v; } } });
+
+                dates.forEach(dt => { 
+                    if(isDateInPeriod(dt.d, homeCurrentPeriod, homeCustomFrom, homeCustomTo)) {
+                        periodSales += dt.v; 
+                        periodOrders++; 
+                        let d = new Date(dt.d); 
+                        if(d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) { 
+                            chartValues[d.getDate()-1] += dt.v; 
+                        }
+                    }
+                });
+                
                 let mSearch = !search || (String(c.code||'').includes(search)) || (String(c.phone||'').includes(search)) || (String(c.name||'').toLowerCase().includes(search));
                 return matchesPeriod && mSearch;
             });
 
-            if(document.getElementById('stat-sales')) document.getElementById('stat-sales').innerText = periodSales.toLocaleString() + " SAR"; if(document.getElementById('stat-clients')) document.getElementById('stat-clients').innerText = periodClientsCount; if(document.getElementById('stat-orders')) document.getElementById('stat-orders').innerText = periodOrders; if(document.getElementById('stat-avg-order')) document.getElementById('stat-avg-order').innerText = periodOrders > 0 ? (periodSales/periodOrders).toFixed(2) + " SAR" : 0;
+            if(document.getElementById('stat-sales')) document.getElementById('stat-sales').innerText = periodSales.toLocaleString() + " SAR"; 
+            if(document.getElementById('stat-clients')) document.getElementById('stat-clients').innerText = periodClientsCount; 
+            if(document.getElementById('stat-orders')) document.getElementById('stat-orders').innerText = periodOrders; 
+            if(document.getElementById('stat-avg-order')) document.getElementById('stat-avg-order').innerText = periodOrders > 0 ? (periodSales/periodOrders).toFixed(2) + " SAR" : 0;
             
             let matched = filteredForTable.slice().reverse();
-            let totalPages = Math.ceil(matched.length / rowsPerPage) || 1; if(homeCurrentPage > totalPages) homeCurrentPage = totalPages;
-            let startIdx = (homeCurrentPage - 1) * rowsPerPage; let pageItems = matched.slice(startIdx, startIdx + rowsPerPage); let html = '';
+            let totalPages = Math.ceil(matched.length / rowsPerPage) || 1; 
+            if(homeCurrentPage > totalPages) homeCurrentPage = totalPages;
+            let startIdx = (homeCurrentPage - 1) * rowsPerPage; 
+            let pageItems = matched.slice(startIdx, startIdx + rowsPerPage);
+            let html = '';
             
             pageItems.forEach(c => {
-                let displayVal = parseFloat(c.totalValue) > 0 ? c.totalValue : (c.lastMaintValue || 0); let displayDate = c.installDate ? c.installDate : (c.lastMaint || '-');
-                let waText = encodeURIComponent(`مرحباً ${c.name}، شكراً لتعاملكم مع شركة بيور أكوا.`); let waBtn = `<button class="btn btn-whatsapp" style="padding:4px 8px;" onclick="sendWhatsAppMsg('${c.phone}', '${waText}')">واتساب</button>`;
+                let displayVal = parseFloat(c.totalValue) > 0 ? c.totalValue : (c.lastMaintValue || 0); 
+                let displayDate = c.installDate ? c.installDate : (c.lastMaint || '-');
+                let waText = encodeURIComponent(`مرحباً ${c.name}، شكراً لتعاملكم مع شركة بيور أكوا.`); 
+                let waBtn = `<button class="btn btn-whatsapp" style="padding:4px 8px;" onclick="sendWhatsAppMsg('${c.phone}', '${waText}')">واتساب</button>`;
                 html += `<tr><td>${c.code}</td><td>${c.type||'عميل'}</td><td>${c.name}</td><td>${c.phone}</td><td>${c.region||'-'}</td><td>${c.tech||'-'}</td><td style="color:var(--success); font-weight:bold;">${displayVal} SAR</td><td>${displayDate}</td><td><span class="badge-user">${c.createdBy||'Admin'}</span></td><td style="text-align:center;">${waBtn}</td></tr>`;
             });
             if(document.getElementById('home-clients-table-body')) document.getElementById('home-clients-table-body').innerHTML = html || '<tr><td colspan="10" style="text-align:center;">لا توجد عمليات في هذه الفترة</td></tr>';
             renderPaginationControls('home-pagination', homeCurrentPage, totalPages, (p) => { homeCurrentPage = p; loadHomeStatsAndChart(); });
             
             let ctx = document.getElementById('mainRevenueChart'); 
-            if(ctx) { if(chartInstance) chartInstance.destroy(); chartInstance = new Chart(ctx.getContext('2d'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'المبيعات', data: chartValues, backgroundColor: '#0284c7' }] }, options: { responsive: true, maintainAspectRatio: false } }); }
+            if(ctx) { 
+                if(chartInstance) chartInstance.destroy(); 
+                chartInstance = new Chart(ctx.getContext('2d'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'المبيعات', data: chartValues, backgroundColor: '#0284c7' }] }, options: { responsive: true, maintainAspectRatio: false } }); 
+            }
         }
 
         function renderInvoicesList() {
-            let clients = getDB('aqua_pure_customers_db'); let s = document.getElementById('search-invoices-input').value.toLowerCase();
+            let clients = getDB('aqua_pure_customers_db');
+            let s = document.getElementById('search-invoices-input').value.toLowerCase();
             let matched = clients.slice().reverse().filter(c => (!s || c.name.toLowerCase().includes(s) || c.code.includes(s) || c.phone.includes(s)) && (parseFloat(c.totalValue) > 0 || parseFloat(c.lastMaintValue) > 0));
-            let totalPages = Math.ceil(matched.length / rowsPerPage) || 1; let startIdx = (invCurrentPage - 1) * rowsPerPage; let pageItems = matched.slice(startIdx, startIdx + rowsPerPage); let html = '';
-            pageItems.forEach(c => { let total = parseFloat(c.totalValue) || parseFloat(c.lastMaintValue) || 0; let date = c.installDate || c.lastMaint || '-'; html += `<tr><td>${c.code}</td><td><strong>${c.name}</strong></td><td>${c.phone}</td><td>${c.region||'-'}</td><td>${c.devicesSummary||'-'}</td><td>${date}</td><td style="color:var(--success); font-weight:bold;">${total} SAR</td><td style="text-align:center;"><button class="btn btn-success" onclick="printCustomerInvoice('${c.code}')">🖨️ طباعة</button></td></tr>`; });
+            let totalPages = Math.ceil(matched.length / rowsPerPage) || 1;
+            let startIdx = (invCurrentPage - 1) * rowsPerPage;
+            let pageItems = matched.slice(startIdx, startIdx + rowsPerPage);
+            let html = '';
+            pageItems.forEach(c => {
+                let total = parseFloat(c.totalValue) || parseFloat(c.lastMaintValue) || 0;
+                let date = c.installDate || c.lastMaint || '-';
+                html += `<tr><td>${c.code}</td><td><strong>${c.name}</strong></td><td>${c.phone}</td><td>${c.region||'-'}</td><td>${c.devicesSummary||'-'}</td><td>${date}</td><td style="color:var(--success); font-weight:bold;">${total} SAR</td><td style="text-align:center;"><button class="btn btn-success" onclick="printCustomerInvoice('${c.code}')">🖨️ طباعة</button></td></tr>`;
+            });
             document.getElementById('invoices-table-body').innerHTML = html || `<tr><td colspan="8" style="text-align: center;">لا توجد فواتير</td></tr>`;
             renderPaginationControls('invoices-pagination', invCurrentPage, totalPages, (p) => { invCurrentPage = p; renderInvoicesList(); });
         }
 
         function renderTechniciansList() {
             let techs = getDB('aqua_pure_techs_db'), clients = getDB('aqua_pure_customers_db'), html = '';
-            techs.forEach((t, idx) => { let cCount = clients.filter(c => c.tech === t.name).length; html += `<tr><td><strong>${t.name}</strong></td><td>${t.phone||'-'}</td><td>${cCount}</td><td>${cCount}</td><td><span style="background:#f0fdf4; color:var(--success); padding:3px 8px; border-radius:4px; font-weight:bold;">${t.status||'نشط'}</span></td><td style="text-align:center;"><button class="btn btn-warning" onclick="openEditTechnician(${idx})">تعديل</button><button class="btn btn-danger" onclick="deleteTechnician(${idx})">حذف</button></td></tr>`; });
+            techs.forEach((t, idx) => {
+                let cCount = clients.filter(c => c.tech === t.name).length;
+                html += `<tr><td><strong>${t.name}</strong></td><td>${t.phone||'-'}</td><td>${cCount}</td><td>${cCount}</td><td><span style="background:#f0fdf4; color:var(--success); padding:3px 8px; border-radius:4px; font-weight:bold;">${t.status||'نشط'}</span></td><td style="text-align:center;"><button class="btn btn-warning" onclick="openEditTechnician(${idx})">تعديل</button><button class="btn btn-danger" onclick="deleteTechnician(${idx})">حذف</button></td></tr>`;
+            });
             document.getElementById('technicians-table-body').innerHTML = html || '<tr><td colspan="6" style="text-align:center;">لا يوجد فنيين</td></tr>';
         }
 
@@ -2169,126 +2555,238 @@
         function saveBasicItem(e) { e.preventDefault(); let type = document.getElementById('basic-item-type').value; let val = document.getElementById('basic-input-name').value.trim(); let key = 'aqua_pure_' + type + 's_db'; let arr = getDB(key); if(!arr.includes(val)) arr.push(val); setDB(key, arr); document.getElementById('basicModal').style.display = 'none'; populateDynamicDropdowns(); renderBasicDataTables(); }
         function deleteBasicItem(type, idx) { let key = 'aqua_pure_' + type + 's_db'; let arr = getDB(key); arr.splice(idx, 1); setDB(key, arr); populateDynamicDropdowns(); renderBasicDataTables(); }
 
-        // إصلاح دالة الاسترجاع من ملف JSON لتتأكد من قراءة البيانات ورفعها بشكل صحيح ومستمر
-        function triggerBackup() { let allData = {}; for (let k in dbMap) allData[dbMap[k]] = getDB(k); let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2)); let a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", "PureAqua_Backup_" + new Date().toISOString().split('T')[0] + ".json"); document.body.appendChild(a); a.click(); a.remove(); }
-        
-        function restoreFromFile() {
-            let f = document.getElementById('restore-file-input').files[0];
-            if(!f) return alert('اختر ملف النسخة أولاً');
-            let r = new FileReader();
-            r.onload = function(e){
-                try {
-                    let p = JSON.parse(e.target.result);
-                    let hasData = false;
-                    for (let k in dbMap) {
-                        if(p[dbMap[k]] !== undefined) {
-                            setDB(k, p[dbMap[k]]);
-                            hasData = true;
-                        }
-                    }
-                    if(hasData) {
-                        logUserActivity("النسخ الاحتياطي", "استرجاع نسخة احتياطية من ملف محلي");
-                        alert('تم استرجاع البيانات بنجاح! سيتم إعادة تحميل الصفحة للتطبيق.');
-                        window.location.reload();
-                    } else {
-                        alert('الملف لا يحتوي على بيانات متوافقة مع النظام.');
-                    }
-                } catch(err){
-                    alert('الملف تالف أو غير صالح.');
-                }
-            };
-            r.readAsText(f);
-        }
-
-        function triggerManualCloudBackup() {
-            let backupId = new Date().toISOString().split('T')[0] + '_Manual_' + Date.now().toString().slice(-4);
-            let allData = {}; for (let k in dbMap) if(k !== 'aqua_pure_backup_logs_db') allData[dbMap[k]] = getDB(k);
-            database.ref('backups/' + backupId).set(allData).then(() => {
-                let logs = getDB('aqua_pure_backup_logs_db');
-                logs.unshift({ id: backupId, time: new Date().toLocaleTimeString('ar-SA'), status: 'نجاح', desc: 'نسخة سحابية يدوية' });
-                setDB('aqua_pure_backup_logs_db', logs);
-                renderBackupLogs();
-                alert('تم أخذ النسخة السحابية بنجاح!');
-            });
-        }
-        function renderBackupLogs() {
-            let logs = getDB('aqua_pure_backup_logs_db'), html = '';
-            logs.forEach(l => {
-                html += `<tr><td>${l.id}</td><td>${l.time}</td><td>${l.status}</td><td>${l.desc||'-'}</td><td style="text-align:center;"><button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteBackupLog('${l.id}')">حذف</button></td></tr>`;
-            });
-            let tbody = document.getElementById('cloud-backup-log-table');
-            if(tbody) tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">لا توجد نسخ</td></tr>';
-        }
-        function deleteBackupLog(id) { setDB('aqua_pure_backup_logs_db', getDB('aqua_pure_backup_logs_db').filter(l => l.id !== id)); renderBackupLogs(); }
-
         function loadTechCashDetails() {
-            let tech = document.getElementById('cash-tech-select').value; let date = document.getElementById('cash-date').value; let tbody = document.getElementById('cash-details-body'); let totalEl = document.getElementById('cash-total-amount');
-            if(!tech || !date) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">برجاء اختيار الفني والتاريخ</td></tr>'; totalEl.innerText = '0'; return; }
-            let clients = getDB('aqua_pure_customers_db'); let total = 0, html = '';
+            let tech = document.getElementById('cash-tech-select').value;
+            let date = document.getElementById('cash-date').value;
+            let tbody = document.getElementById('cash-details-body');
+            let totalEl = document.getElementById('cash-total-amount');
+            if(!tech || !date) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">برجاء اختيار الفني والتاريخ</td></tr>';
+                totalEl.innerText = '0';
+                return;
+            }
+            let clients = getDB('aqua_pure_customers_db');
+            let total = 0, html = '';
             clients.forEach(c => {
-                if(c.tech === tech && c.installDate === date && !c.installSettled && parseFloat(c.totalValue) > 0) { total += parseFloat(c.totalValue); html += `<tr><td>${c.code}</td><td>${c.name}</td><td>تركيب</td><td>${c.devicesSummary||'-'}</td><td>${c.totalValue}</td></tr>`; }
-                if(c.tech === tech && c.lastMaint === date && !c.lastMaintSettled && parseFloat(c.lastMaintValue) > 0) { total += parseFloat(c.lastMaintValue); html += `<tr><td>${c.code}</td><td>${c.name}</td><td>صيانة</td><td>صيانة دورية</td><td>${c.lastMaintValue}</td></tr>`; }
+                if(c.tech === tech && c.installDate === date && !c.installSettled && parseFloat(c.totalValue) > 0) {
+                    total += parseFloat(c.totalValue);
+                    html += `<tr><td>${c.code}</td><td>${c.name}</td><td>تركيب</td><td>${c.devicesSummary||'-'}</td><td>${c.totalValue}</td></tr>`;
+                }
+                if(c.tech === tech && c.lastMaint === date && !c.lastMaintSettled && parseFloat(c.lastMaintValue) > 0) {
+                    total += parseFloat(c.lastMaintValue);
+                    html += `<tr><td>${c.code}</td><td>${c.name}</td><td>صيانة</td><td>صيانة دورية</td><td>${c.lastMaintValue}</td></tr>`;
+                }
             });
-            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">لا توجد مبالغ مستحقة</td></tr>'; totalEl.innerText = total.toLocaleString();
+            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">لا توجد مبالغ مستحقة</td></tr>';
+            totalEl.innerText = total.toLocaleString();
         }
 
         function processCashSettlement() {
-            let tech = document.getElementById('cash-tech-select').value; let date = document.getElementById('cash-date').value; let total = document.getElementById('cash-total-amount').innerText;
+            let tech = document.getElementById('cash-tech-select').value;
+            let date = document.getElementById('cash-date').value;
+            let total = document.getElementById('cash-total-amount').innerText;
             if(!tech || !date || total === '0') return alert('لا توجد مبالغ للتصفية.');
             if(confirm(`تأكيد تصفية ${total} SAR للفني ${tech}؟`)) {
                 let clients = getDB('aqua_pure_customers_db');
-                clients.forEach(c => { if(c.tech === tech && c.installDate === date) c.installSettled = true; if(c.tech === tech && c.lastMaint === date) c.lastMaintSettled = true; });
-                setDB('aqua_pure_customers_db', clients); logUserActivity("تصفية الكاش", `تصفية مبلغ ${total} SAR للفني: ${tech}`); alert('تمت التصفية بنجاح!'); loadTechCashDetails();
+                clients.forEach(c => {
+                    if(c.tech === tech && c.installDate === date) c.installSettled = true;
+                    if(c.tech === tech && c.lastMaint === date) c.lastMaintSettled = true;
+                });
+                setDB('aqua_pure_customers_db', clients);
+                logUserActivity("تصفية الكاش", `تصفية مبلغ ${total} SAR للفني: ${tech}`);
+                alert('تمت التصفية بنجاح!');
+                loadTechCashDetails();
             }
         }
 
         function renderTechMovementsList() {
             let store = getDB('aqua_pure_store_db'), html = '';
-            store.slice().reverse().forEach((s, idx) => { let rIdx = store.length - 1 - idx; html += `<tr><td>${s.tech}</td><td>${s.type}</td><td>${s.item}</td><td>${s.qty}</td><td>${s.date}</td><td><span class="badge-user">${s.user||'Admin'}</span></td><td style="text-align:center;"><button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteStoreMovement(${rIdx})">حذف</button></td></tr>`; });
-            let tbody = document.getElementById('tech-movements-tbody'); if(tbody) tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center;">لا توجد حركات</td></tr>';
+            store.slice().reverse().forEach((s, idx) => {
+                let rIdx = store.length - 1 - idx;
+                html += `<tr><td>${s.tech}</td><td>${s.type}</td><td>${s.item}</td><td>${s.qty}</td><td>${s.date}</td><td><span class="badge-user">${s.user||'Admin'}</span></td><td style="text-align:center;"><button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteStoreMovement(${rIdx})">حذف</button></td></tr>`;
+            });
+            let tbody = document.getElementById('tech-movements-tbody');
+            if(tbody) tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center;">لا توجد حركات</td></tr>';
         }
 
-        function deleteStoreMovement(idx) { if(confirm('حذف الحركة؟')) { let store = getDB('aqua_pure_store_db'); store.splice(idx, 1); setDB('aqua_pure_store_db', store); renderTechStoreList(); } }
-        function resetEntireStore() { if(confirm('تصفير المخزن بالكامل؟')) { setDB('aqua_pure_store_db', []); renderTechStoreList(); } }
-        function resetSpecificTechStore() { let tech = prompt('أدخل اسم الفني لتصفير عهدته:'); if(!tech) return; setDB('aqua_pure_store_db', getDB('aqua_pure_store_db').filter(s => s.tech !== tech.trim())); renderTechStoreList(); alert('تم تصفير عهدة الفني!'); }
+        function deleteStoreMovement(idx) {
+            if(confirm('حذف الحركة؟')) {
+                let store = getDB('aqua_pure_store_db');
+                store.splice(idx, 1);
+                setDB('aqua_pure_store_db', store);
+                renderTechStoreList();
+            }
+        }
 
-        function openStoreActionModal(type) { document.getElementById('store-action-type').value = type; document.getElementById('store-modal-title').innerText = 'حركة مخزن: ' + type; document.getElementById('store-items-container').innerHTML = ''; populateDynamicDropdowns(); addStoreItemRow(); document.getElementById('storeActionModal').style.display = 'flex'; }
-        function addStoreItemRow() { let devices = getDB('aqua_pure_devices_db'), reasons = getDB('aqua_pure_reasons_db'); let devOpts = devices.map(d => `<option value="${d}">${d}</option>`).join(''); let reasonOpts = reasons.map(r => `<option value="${r}">${r}</option>`).join(''); let row = document.createElement('div'); row.className = 'store-item-row'; row.style.cssText = 'display:flex; gap:8px; align-items:center;'; row.innerHTML = `<select class="form-control store-item-name" style="flex:2; margin-bottom:0;" required><option value="">-- اختر --</option><optgroup label="الأجهزة">${devOpts}</optgroup><optgroup label="القطع">${reasonOpts}</optgroup></select><input type="number" class="form-control store-item-qty" min="1" value="1" style="flex:1; margin-bottom:0;" required><button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">✖</button>`; document.getElementById('store-items-container').appendChild(row); }
-        function saveStoreAction(e) { e.preventDefault(); let type = document.getElementById('store-action-type').value; let tech = document.getElementById('store-tech-name').value; let today = new Date().toISOString().split('T')[0]; let store = getDB('aqua_pure_store_db'); document.querySelectorAll('.store-item-row').forEach(row => { let item = row.querySelector('.store-item-name').value; let qty = parseInt(row.querySelector('.store-item-qty').value) || 1; if(item) store.push({ id: Date.now().toString() + Math.random(), tech, item, qty, type, date: today, user: getCurrentUser() }); }); setDB('aqua_pure_store_db', store); document.getElementById('storeActionModal').style.display = 'none'; renderTechStoreList(); alert('تم حفظ حركة المخزن بنجاح!'); }
+        function resetEntireStore() {
+            if(confirm('تصفير المخزن بالكامل؟')) {
+                setDB('aqua_pure_store_db', []);
+                renderTechStoreList();
+            }
+        }
 
-        function openTechProductivityModal() { populateDynamicDropdowns(); let today = new Date(); document.getElementById('prod-month').value = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0'); document.getElementById('techProductivityModal').style.display = 'flex'; calculateTechProductivity(); }
+        function resetSpecificTechStore() {
+            let tech = prompt('أدخل اسم الفني لتصفير عهدته:');
+            if(!tech) return;
+            setDB('aqua_pure_store_db', getDB('aqua_pure_store_db').filter(s => s.tech !== tech.trim()));
+            renderTechStoreList();
+            alert('تم تصفير عهدة الفني!');
+        }
+
+        function openStoreActionModal(type) {
+            document.getElementById('store-action-type').value = type;
+            document.getElementById('store-modal-title').innerText = 'حركة مخزن: ' + type;
+            document.getElementById('store-items-container').innerHTML = '';
+            populateDynamicDropdowns();
+            addStoreItemRow();
+            document.getElementById('storeActionModal').style.display = 'flex';
+        }
+
+        function addStoreItemRow() {
+            let devices = getDB('aqua_pure_devices_db'), reasons = getDB('aqua_pure_reasons_db');
+            let devOpts = devices.map(d => `<option value="${d}">${d}</option>`).join('');
+            let reasonOpts = reasons.map(r => `<option value="${r}">${r}</option>`).join('');
+            let row = document.createElement('div');
+            row.className = 'store-item-row';
+            row.style.cssText = 'display:flex; gap:8px; align-items:center;';
+            row.innerHTML = `<select class="form-control store-item-name" style="flex:2; margin-bottom:0;" required><option value="">-- اختر --</option><optgroup label="الأجهزة">${devOpts}</optgroup><optgroup label="القطع">${reasonOpts}</optgroup></select><input type="number" class="form-control store-item-qty" min="1" value="1" style="flex:1; margin-bottom:0;" required><button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">✖</button>`;
+            document.getElementById('store-items-container').appendChild(row);
+        }
+
+        function saveStoreAction(e) {
+            e.preventDefault();
+            let type = document.getElementById('store-action-type').value;
+            let tech = document.getElementById('store-tech-name').value;
+            let today = new Date().toISOString().split('T')[0];
+            let store = getDB('aqua_pure_store_db');
+            document.querySelectorAll('.store-item-row').forEach(row => {
+                let item = row.querySelector('.store-item-name').value;
+                let qty = parseInt(row.querySelector('.store-item-qty').value) || 1;
+                if(item) store.push({ id: Date.now().toString() + Math.random(), tech, item, qty, type, date: today, user: getCurrentUser() });
+            });
+            setDB('aqua_pure_store_db', store);
+            document.getElementById('storeActionModal').style.display = 'none';
+            renderTechStoreList();
+            alert('تم حفظ حركة المخزن بنجاح!');
+        }
+
+        function openTechProductivityModal() {
+            populateDynamicDropdowns();
+            let today = new Date();
+            document.getElementById('prod-month').value = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+            document.getElementById('techProductivityModal').style.display = 'flex';
+            calculateTechProductivity();
+        }
+
         function calculateTechProductivity() {
-            let tech = document.getElementById('prod-tech-select').value; let monthVal = document.getElementById('prod-month').value; let installRate = parseFloat(document.getElementById('prod-install-rate').value) || 0; let maintRate = parseFloat(document.getElementById('prod-maint-rate').value) || 0; let baseSalary = parseFloat(document.getElementById('prod-base-salary').value) || 0;
-            if(!tech || !monthVal) return; let installCount = 0, maintCount = 0, totalVal = 0, tbodyHtml = ''; let clients = getDB('aqua_pure_customers_db');
+            let tech = document.getElementById('prod-tech-select').value;
+            let monthVal = document.getElementById('prod-month').value;
+            let installRate = parseFloat(document.getElementById('prod-install-rate').value) || 0;
+            let maintRate = parseFloat(document.getElementById('prod-maint-rate').value) || 0;
+            let baseSalary = parseFloat(document.getElementById('prod-base-salary').value) || 0;
+
+            if(!tech || !monthVal) return;
+            let installCount = 0, maintCount = 0, totalVal = 0, tbodyHtml = '';
+            let clients = getDB('aqua_pure_customers_db');
             clients.forEach(c => {
                 if(c.tech === tech) {
-                    if(c.installDate && c.installDate.startsWith(monthVal) && parseFloat(c.totalValue) > 0) { installCount++; totalVal += parseFloat(c.totalValue); tbodyHtml += `<tr><td>${c.installDate}</td><td>${c.name}</td><td>تركيب</td><td>${c.totalValue}</td></tr>`; }
-                    if(c.lastMaint && c.lastMaint.startsWith(monthVal) && parseFloat(c.lastMaintValue) > 0) { maintCount++; totalVal += parseFloat(c.lastMaintValue); tbodyHtml += `<tr><td>${c.lastMaint}</td><td>${c.name}</td><td>صيانة</td><td>${c.lastMaintValue}</td></tr>`; }
+                    if(c.installDate && c.installDate.startsWith(monthVal) && parseFloat(c.totalValue) > 0) {
+                        installCount++; totalVal += parseFloat(c.totalValue);
+                        tbodyHtml += `<tr><td>${c.installDate}</td><td>${c.name}</td><td>تركيب</td><td>${c.totalValue}</td></tr>`;
+                    }
+                    if(c.lastMaint && c.lastMaint.startsWith(monthVal) && parseFloat(c.lastMaintValue) > 0) {
+                        maintCount++; totalVal += parseFloat(c.lastMaintValue);
+                        tbodyHtml += `<tr><td>${c.lastMaint}</td><td>${c.name}</td><td>صيانة</td><td>${c.lastMaintValue}</td></tr>`;
+                    }
                 }
             });
-            let totalCommissions = (installCount * installRate) + (maintCount * maintRate); document.getElementById('prod-install-count').innerText = installCount; document.getElementById('prod-maint-count').innerText = maintCount; document.getElementById('prod-total-val').innerText = totalCommissions.toFixed(2) + ' SAR'; document.getElementById('prod-total-salary').innerText = (totalCommissions + baseSalary).toFixed(2) + ' SAR'; document.getElementById('prod-details-body').innerHTML = tbodyHtml || '<tr><td colspan="4" style="text-align:center;">لا توجد عمليات</td></tr>';
+            let totalCommissions = (installCount * installRate) + (maintCount * maintRate);
+            document.getElementById('prod-install-count').innerText = installCount;
+            document.getElementById('prod-maint-count').innerText = maintCount;
+            document.getElementById('prod-total-val').innerText = totalCommissions.toFixed(2) + ' SAR';
+            document.getElementById('prod-total-salary').innerText = (totalCommissions + baseSalary).toFixed(2) + ' SAR';
+            document.getElementById('prod-details-body').innerHTML = tbodyHtml || '<tr><td colspan="4" style="text-align:center;">لا توجد عمليات</td></tr>';
         }
+
         function printTechProductivity() {
-            let tech = document.getElementById('prod-tech-select').value; let monthVal = document.getElementById('prod-month').value; let totalSalary = document.getElementById('prod-total-salary').innerText; let tableHTML = document.getElementById('prod-details-body').innerHTML; let sys = getDB('aqua_pure_sys_settings_db'); let cName = sys.nameAr || 'شركة بيور أكوا لتحلية المياه النقية';
-            let win = window.open('', '_blank'); win.document.write(`<html lang="ar" dir="rtl"><head><title>إنتاجية - ${tech}</title><style>body{font-family:'Cairo',sans-serif; padding:20px;} table{width:100%; border-collapse:collapse; margin-top:20px;} th,td{border:1px solid #ccc; padding:8px; text-align:center;} th{background:#f1f5f9;}</style></head><body><h2 style="text-align:center;">${cName}</h2><h3 style="text-align:center;">إنتاجية وراتب الفني: ${tech} (${monthVal})</h3><h3>إجمالي المستحق: ${totalSalary}</h3><table><thead><tr><th>التاريخ</th><th>العميل</th><th>العملية</th><th>المبلغ</th></tr></thead><tbody>${tableHTML}</tbody></table><script>window.onload=function(){window.print();}<\/script></body></html>`); win.document.close();
+            let tech = document.getElementById('prod-tech-select').value;
+            let monthVal = document.getElementById('prod-month').value;
+            let totalSalary = document.getElementById('prod-total-salary').innerText;
+            let tableHTML = document.getElementById('prod-details-body').innerHTML;
+            let sys = getDB('aqua_pure_sys_settings_db');
+            let cName = sys.nameAr || 'شركة بيور أكوا لتحلية المياه النقية';
+            let win = window.open('', '_blank');
+            win.document.write(`<html lang="ar" dir="rtl"><head><title>إنتاجية - ${tech}</title><style>body{font-family:'Cairo',sans-serif; padding:20px;} table{width:100%; border-collapse:collapse; margin-top:20px;} th,td{border:1px solid #ccc; padding:8px; text-align:center;} th{background:#f1f5f9;}</style></head><body>
+                <h2 style="text-align:center;">${cName}</h2><h3 style="text-align:center;">إنتاجية وراتب الفني: ${tech} (${monthVal})</h3>
+                <h3>إجمالي المستحق: ${totalSalary}</h3>
+                <table><thead><tr><th>التاريخ</th><th>العميل</th><th>العملية</th><th>المبلغ</th></tr></thead><tbody>${tableHTML}</tbody></table>
+                <script>window.onload=function(){window.print();}<\/script></body></html>`);
+            win.document.close();
         }
 
         function openQuoteModal(code = null) {
-            populateDynamicDropdowns(); document.getElementById('q-date').value = new Date().toISOString().split('T')[0]; let container = document.getElementById('quote-devices-container'); container.innerHTML = '';
-            if(code) { let q = getDB('aqua_pure_quotes_db').find(x => String(x.code) === String(code)); if(q) { document.getElementById('q-code').value = q.code; document.getElementById('q-name').value = q.name || ''; document.getElementById('q-phone').value = q.phone || ''; document.getElementById('q-notes').value = q.notes || ''; let arr = q.devicesSummary ? q.devicesSummary.split('، ') : []; arr.forEach(str => { let match = str.match(/(.*?)\s*\(الكمية:\s*([\d.]+)\s*×\s*([\d.]+)/); if(match) addQuoteDeviceRow(match[1].trim(), match[2], match[3]); else addQuoteDeviceRow(str.trim(), 1, 0); }); } } 
-            else { document.getElementById('q-code').value = getNextQuoteCode(); document.getElementById('q-name').value = ''; document.getElementById('q-phone').value = ''; document.getElementById('q-notes').value = 'الأسعار تشمل التوريد والتركيب والضمان.'; addQuoteDeviceRow(); }
-            calculateQuoteTotal(); document.getElementById('quoteModal').style.display = 'flex';
+            populateDynamicDropdowns();
+            document.getElementById('q-date').value = new Date().toISOString().split('T')[0];
+            let container = document.getElementById('quote-devices-container');
+            container.innerHTML = '';
+            if(code) {
+                let q = getDB('aqua_pure_quotes_db').find(x => String(x.code) === String(code));
+                if(q) {
+                    document.getElementById('q-code').value = q.code;
+                    document.getElementById('q-name').value = q.name || '';
+                    document.getElementById('q-phone').value = q.phone || '';
+                    document.getElementById('q-notes').value = q.notes || '';
+                    let arr = q.devicesSummary ? q.devicesSummary.split('، ') : [];
+                    arr.forEach(str => {
+                        let match = str.match(/(.*?)\s*\(الكمية:\s*([\d.]+)\s*×\s*([\d.]+)/);
+                        if(match) addQuoteDeviceRow(match[1].trim(), match[2], match[3]);
+                        else addQuoteDeviceRow(str.trim(), 1, 0);
+                    });
+                }
+            } else {
+                document.getElementById('q-code').value = getNextQuoteCode();
+                document.getElementById('q-name').value = '';
+                document.getElementById('q-phone').value = '';
+                document.getElementById('q-notes').value = 'الأسعار تشمل التوريد والتركيب والضمان.';
+                addQuoteDeviceRow();
+            }
+            calculateQuoteTotal();
+            document.getElementById('quoteModal').style.display = 'flex';
         }
 
         function saveQuote(e) {
-            e.preventDefault(); let code = document.getElementById('q-code').value; let name = document.getElementById('q-name').value.trim(); let phone = document.getElementById('q-phone').value.trim(); let date = document.getElementById('q-date').value; let notes = document.getElementById('q-notes').value.trim(); let devicesSummaryArr = [], totalValue = 0;
-            document.querySelectorAll('.quote-device-row').forEach(row => { let qty = parseFloat(row.querySelector('.quote-dev-qty').value) || 1; let unitPrice = parseFloat(row.querySelector('.quote-dev-unit-price').value) || 0; let lineTotal = qty * unitPrice; let itemName = row.querySelector('.quote-dev-type').value; totalValue += lineTotal; devicesSummaryArr.push(`${itemName} (الكمية: ${qty} × ${unitPrice} = ${lineTotal} SAR)`); });
-            let quotes = getDB('aqua_pure_quotes_db'); let idx = quotes.findIndex(i => String(i.code) === String(code));
-            if(idx >= 0) quotes[idx] = { ...quotes[idx], name, phone, date, notes, devicesSummary: devicesSummaryArr.join('، '), totalValue, updatedBy: getCurrentUser() }; else quotes.push({ code, name, phone, date, notes, devicesSummary: devicesSummaryArr.join('، '), totalValue, createdBy: getCurrentUser() });
-            setDB('aqua_pure_quotes_db', quotes); document.getElementById('quoteModal').style.display = 'none'; renderQuotesList(); alert("تم حفظ عرض السعر بنجاح!");
+            e.preventDefault();
+            let code = document.getElementById('q-code').value;
+            let name = document.getElementById('q-name').value.trim();
+            let phone = document.getElementById('q-phone').value.trim();
+            let date = document.getElementById('q-date').value;
+            let notes = document.getElementById('q-notes').value.trim();
+            let devicesSummaryArr = [], totalValue = 0;
+            document.querySelectorAll('.quote-device-row').forEach(row => {
+                let qty = parseFloat(row.querySelector('.quote-dev-qty').value) || 1;
+                let unitPrice = parseFloat(row.querySelector('.quote-dev-unit-price').value) || 0;
+                let lineTotal = qty * unitPrice;
+                let itemName = row.querySelector('.quote-dev-type').value;
+                totalValue += lineTotal;
+                devicesSummaryArr.push(`${itemName} (الكمية: ${qty} × ${unitPrice} = ${lineTotal} SAR)`);
+            });
+            let quotes = getDB('aqua_pure_quotes_db');
+            let idx = quotes.findIndex(i => String(i.code) === String(code));
+            if(idx >= 0) quotes[idx] = { ...quotes[idx], name, phone, date, notes, devicesSummary: devicesSummaryArr.join('، '), totalValue, updatedBy: getCurrentUser() };
+            else quotes.push({ code, name, phone, date, notes, devicesSummary: devicesSummaryArr.join('، '), totalValue, createdBy: getCurrentUser() });
+            setDB('aqua_pure_quotes_db', quotes);
+            document.getElementById('quoteModal').style.display = 'none';
+            renderQuotesList();
+            alert("تم حفظ عرض السعر بنجاح!");
         }
 
-        function deleteQuote(code) { if(confirm('حذف عرض السعر؟')) { setDB('aqua_pure_quotes_db', getDB('aqua_pure_quotes_db').filter(q => String(q.code) !== String(code))); renderQuotesList(); } }
+        function deleteQuote(code) {
+            if(confirm('حذف عرض السعر؟')) {
+                setDB('aqua_pure_quotes_db', getDB('aqua_pure_quotes_db').filter(q => String(q.code) !== String(code)));
+                renderQuotesList();
+            }
+        }
+
     </script>
 </body>
 </html>
