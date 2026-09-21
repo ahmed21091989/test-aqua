@@ -2702,6 +2702,140 @@ function printSingleExternalOperation(id) {
                 tempDiv.remove();
             });
         }
+let container = document.getElementById('customer-devices-container'); 
+            container.innerHTML = ''; 
+            let devicesArr = c.devicesSummary ? c.devicesSummary.split('، ') : []; 
+            if(devicesArr.length === 0) {
+                addCustomerDeviceRow();
+            } else {
+                devicesArr.forEach(devStr => {
+                    let match = devStr.match(/(.*?)\s*\(الكمية:\s*([\d.]+)\s*×\s*([\d.]+)/);
+                    if(match) {
+                        addCustomerDeviceRow(match[1].trim(), match[2], match[3]);
+                    } else {
+                        let simpleMatch = devStr.match(/(.*?)\s*\(([\d.]+)\s*SAR\)/);
+                        addCustomerDeviceRow(simpleMatch ? simpleMatch[1].trim() : devStr.trim(), 1, simpleMatch ? simpleMatch[2] : 0);
+                    }
+                });
+            }
+            calculateModalTotal(); 
+            document.getElementById('customerModal').style.display = 'flex';
+        }
+    }
+
+    // التعديل 9: استيراد وتحديد الكل والحذف الجماعي
+    function toggleSelectAllCust(chk) {
+        document.querySelectorAll('.cust-chk').forEach(c => c.checked = chk.checked);
+        updateSelectedCustCount();
+    }
+    function updateSelectedCustCount() {
+        let cnt = document.querySelectorAll('.cust-chk:checked').length;
+        document.getElementById('selected-cust-count').innerText = `تم تحديد: ${cnt}`;
+    }
+    function deleteSelectedCustomers() {
+        let master = JSON.parse(localStorage.getItem('aqua_pure_master_settings_db') || '{"allowDelete":true}');
+        if(master.allowDelete === false) return alert('⚠️ زر الحذف مغلق.');
+        let checked = document.querySelectorAll('.cust-chk:checked');
+        if(checked.length === 0) return alert('حدد عملاء للحذف');
+        if(!confirm(`هل أنت متأكد من حذف ${checked.length} عميل؟`)) return;
+        
+        let codesToDelete = Array.from(checked).map(c => c.value);
+        let clients = getDB('aqua_pure_customers_db');
+        clients = clients.filter(c => !codesToDelete.includes(String(c.code)));
+        setDB('aqua_pure_customers_db', clients);
+        
+        logUserActivity("العملاء", `حذف جماعي لعدد ${codesToDelete.length} عميل`);
+        document.getElementById('selectAllCust').checked = false;
+        updateSelectedCustCount();
+        renderCustomersList();
+    }
+    function importCustomersCSV(event) {
+        let file = event.target.files[0];
+        if(!file) return;
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            let text = e.target.result;
+            let rows = text.split('\n');
+            let clients = getDB('aqua_pure_customers_db');
+            let imported = 0;
+            let maxCode = 100;
+            clients.forEach(c => { let n = parseInt(c.code); if(!isNaN(n) && n > maxCode) maxCode = n; });
+            
+            for(let i = 1; i < rows.length; i++) {
+                let cols = rows[i].split(',');
+                if(cols.length >= 2 && cols[0].trim() !== '') {
+                    maxCode++;
+                    clients.push({
+                        code: maxCode.toString(),
+                        name: cols[0].trim(),
+                        phone: cols[1] ? cols[1].trim() : '',
+                        type: 'عميل',
+                        region: cols[2] ? cols[2].trim() : '',
+                        tech: cols[3] ? cols[3].trim() : '',
+                        createdBy: getCurrentUser(),
+                        totalValue: 0,
+                        lastMaintValue: 0,
+                        installDate: new Date().toISOString().split('T')[0]
+                    });
+                    imported++;
+                }
+            }
+            setDB('aqua_pure_customers_db', clients);
+            alert(`تم استيراد ${imported} عميل بنجاح`);
+            renderCustomersList();
+        };
+        reader.readAsText(file);
+        event.target.value = ''; 
+    }
+
+    function renderCustomersList() {
+        let clients = getDB('aqua_pure_customers_db'); 
+        let s = document.getElementById('search-customer-input').value.toLowerCase(); 
+        let tech = document.getElementById('filter-tech-input').value; 
+        let reg = document.getElementById('filter-region-select').value; 
+        let typeF = document.getElementById('filter-type-select').value; 
+        let matched = clients.slice().reverse().filter(c => (!s || (String(c.name||'').toLowerCase().includes(s)) || (String(c.code||'').includes(s)) || (String(c.phone||'').includes(s))) && (tech === 'all' || c.tech === tech) && (reg === 'all' || c.region === reg) && (typeF === 'all' || c.type === typeF));
+        
+        let totalPages = Math.ceil(matched.length / rowsPerPage) || 1; 
+        if(custCurrentPage > totalPages) custCurrentPage = totalPages; 
+        let startIdx = (custCurrentPage - 1) * rowsPerPage; 
+        let pageItems = matched.slice(startIdx, startIdx + rowsPerPage); 
+        let html = '';
+        
+        pageItems.forEach(c => {
+            let displayVal = parseFloat(c.totalValue) > 0 ? c.totalValue : (c.lastMaintValue || 0); 
+            let displayDate = c.installDate ? c.installDate : (c.lastMaint || '-');
+            let userSpan = `<span class="badge-user">${c.createdBy || c.updatedBy || 'Admin'}</span>`;
+            let printBtn = displayVal > 0 ? `<button class="btn btn-success" style="padding:4px 8px;" onclick="printCustomerInvoice('${c.code}')">🖨️ فاتورة</button>` : '';
+            
+            let gpsBtn = c.gps ? `<a href="${c.gps}" target="_blank" class="btn btn-info" style="padding:3px 8px; font-size:0.75rem;">📍 فتح الرابط</a>` : '<span style="color:#94a3b8;">-</span>';
+            
+            html += `<tr onclick="localStorage.setItem('last_active_customer_code', '${c.code}')">
+                <td onclick="event.stopPropagation();" style="text-align:center;"><input type="checkbox" class="cust-chk" value="${c.code}" onchange="updateSelectedCustCount()"></td>
+                <td>${c.code}</td>
+                <td><strong>${c.name}</strong></td>
+                <td>${c.type||'عميل'}</td>
+                <td>${c.phone}</td>
+                <td>${c.region||'-'}</td>
+                <td>${c.address||'-'}</td>
+                <td style="text-align:center;">${gpsBtn}</td>
+                <td>${c.tech||'-'}</td>
+                <td>${c.devicesSummary||'-'}</td>
+                <td>${displayDate}</td>
+                <td>${userSpan}</td>
+                <td><div class="action-btns"><button class="btn btn-warning" onclick="openEditCustomer('${c.code}')">تعديل</button>${printBtn}<button class="btn btn-danger" onclick="deleteClientByCode('${c.code}')">حذف</button></div></td>
+            </tr>`;
+        });
+        document.getElementById('customers-table-body').innerHTML = html || '<tr><td colspan="13" style="text-align:center;">لا توجد بيانات</td></tr>'; 
+        renderPaginationControls('customers-pagination', custCurrentPage, totalPages, (p) => { custCurrentPage = p; renderCustomersList(); });
+    }
+
+    function renderMaintenanceCards() {
+        let clients = getDB('aqua_pure_customers_db'); 
+        let s = document.getElementById('maint-search-input') ? document.getElementById('maint-search-input').value.toLowerCase() : ""; 
+        let tech = document.getElementById('maint-filter-tech') ? document.getElementById('maint-filter-tech').value : "all"; 
+        let reg = document.getElementById('maint-filter-region') ? document.getElementById('maint-filter-region').value : "all"; 
+        let matched = clients.filter(c => (!s || (String(c.name||'').toLowerCase().includes(s)) || (String(c.code||'').includes(s)) || (
 String(c.phone||'').includes(s))) && (tech === 'all' || c.tech === tech) && (reg === 'all' || c.region === reg));
             
             let totalPages = Math.ceil(matched.length / rowsPerPage) || 1; 
