@@ -66,14 +66,14 @@
         /* التعديل 10: ترويسة الطباعة الشاملة الديناميكية وإصلاح قص الجداول */
         #global-print-header { display: none; }
         @media print { 
-            @page { size: A4 portrait; margin: 1cm; } 
+            @page { size: A4 landscape; margin: 0.5cm; } 
             #global-print-header { display: block !important; margin-bottom: 20px; }
             aside, header, .btn, input, select, textarea, .modal, #login-screen, #customer-portal-screen, .mobile-menu-btn, .pagination-container, .action-btns { display: none !important; } 
             html, body, .app-container, main, .content-body { height: auto !important; overflow: visible !important; display: block !important; background: #fff !important; margin: 0 !important; padding: 0 !important; } 
             .card { border: none !important; box-shadow: none !important; padding: 0 !important; margin-bottom: 20px !important; } 
-            table { border: 2px solid #000 !important; font-size: 12px !important; page-break-inside: auto; width: 100% !important; table-layout: fixed; word-wrap: break-word; } 
+            table { border: 2px solid #000 !important; font-size: 11px !important; page-break-inside: auto; width: 100% !important; } 
             tr { page-break-inside: avoid; page-break-after: auto; }
-            th, td { border: 1px solid #000 !important; color: #000 !important; padding: 8px !important; overflow-wrap: break-word; white-space: normal !important; } 
+            th, td { border: 1px solid #000 !important; color: #000 !important; padding: 6px !important; white-space: nowrap !important; } 
             * { color: #000 !important; } 
         }
     </style>
@@ -335,8 +335,7 @@
                         <div id="external-installs-pagination" class="pagination-container"></div>
                     </div>
                 </div>
-
-                <!-- 4. الصيانات -->
+<!-- 4. الصيانات -->
                 <div id="maintenance-cards" class="tab-content">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap:wrap; gap:10px;">
                         <h2 style="font-size: 1.4rem; color: var(--primary-dark);">📋 بطاقات الصيانات</h2>
@@ -1170,7 +1169,7 @@
             'aqua_pure_techs_db': 'techs', 
             'aqua_pure_users_db': 'users', 
             'aqua_pure_regions_db': 'regions', 
-            'aqua_pure_companies_db': 'companies', // التعديل 3: الشركات الخارجية
+            'aqua_pure_companies_db': 'companies',
             'aqua_pure_devices_db': 'devices', 
             'aqua_pure_reasons_db': 'reasons', 
             'aqua_pure_delegates_db': 'delegates', 
@@ -1297,7 +1296,6 @@
             return true;
         }
 
-        // التعديل 8: الشاشة الرئيسية تعرض الشهر الحالي افتراضياً
         let homeCurrentPeriod = 'current_month';
         let homeCustomFrom = '';
         let homeCustomTo = '';
@@ -1611,12 +1609,23 @@
         }
 
         function closeCustomerPortal() {
-            window.location.href = window.location.pathname; 
+            // التعديل 2 (أمان بوابة العميل): عدم توجيه العميل نهائياً إلى صفحة الدخول أو الرئيسية لمنع الاختراق
+            // يتم عرض رسالة خروج آمنة فقط وإخفاء أي محتوى آخر، وبالتالي يظل داخل شاشته الآمنة
+            document.getElementById('customer-portal-screen').innerHTML = `
+                <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; width:100vw; background:#f8fafc; padding:20px; text-align:center;">
+                    <div style="background:#fff; padding:40px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.1); width:100%; max-width:400px;">
+                        <div style="font-size:3rem; margin-bottom:15px;">🔒</div>
+                        <h2 style="color:var(--success); margin-bottom:10px;">تم الخروج بأمان</h2>
+                        <p style="color:#64748b; font-size:1.1rem;">شكراً لاستخدامك البوابة، يمكنك الآن إغلاق هذه الصفحة بأمان تام.</p>
+                    </div>
+                </div>
+            `;
+            window.currentPortalCode = null;
+            window.currentPortalPhone = null;
         }
 
         function toggleMobileMenu() { let aside = document.getElementById('sidebar-menu'); let overlay = document.getElementById('mobile-overlay'); if(aside.classList.contains('open')) { aside.classList.remove('open'); overlay.classList.remove('open'); } else { aside.classList.add('open'); overlay.classList.add('open'); } }
-
-        function handleLogin(e) {
+function handleLogin(e) {
             e.preventDefault(); 
             let u = document.getElementById('login-username').value.trim().toLowerCase(); 
             let p = document.getElementById('login-password').value.trim(); 
@@ -2270,8 +2279,7 @@
             document.getElementById('externalCompanyStatementModal').style.display = 'flex';
             generateCompanyStatement();
         }
-
-        function generateCompanyStatement() {
+function generateCompanyStatement() {
             let company = document.getElementById('ext-statement-company-select').value;
             let from = document.getElementById('ext-statement-from').value;
             let to = document.getElementById('ext-statement-to').value;
@@ -3192,7 +3200,6 @@
             sendWhatsAppMsg(s.phone, encodeURIComponent(msg));
         }
 
-        // التعديل 1: منع التكرار وإنشاء مبيعات جديدة عند التعديل، التعديل 7: مدة الضمان
         function saveCustomerAndMaintenance(e) {
             e.preventDefault(); 
             let code = document.getElementById('c-code').value; 
@@ -3333,7 +3340,6 @@
             }
         }
 
-        // التعديل 2 والتعديل 7: تحديث بطاقة الصيانة وخصم العهدة تلقائياً
         function saveMaintenanceDateFinal(e) {
             e.preventDefault(); 
             let clients = getDB('aqua_pure_customers_db'); 
@@ -3413,7 +3419,6 @@
             }
         }
 
-        // التعديل 9: استيراد وتحديد الكل والحذف الجماعي
         function toggleSelectAllCust(chk) {
             document.querySelectorAll('.cust-chk').forEach(c => c.checked = chk.checked);
             updateSelectedCustCount();
@@ -3710,7 +3715,6 @@
             } 
         }
 
-        // التعديل 4: طباعة الفاتورة وربط الـ QR ببوابة العميل
         function printCustomerInvoice(code) { 
             let c = getDB('aqua_pure_customers_db').find(i => String(i.code) === String(code)); 
             if(!c) return; 
@@ -3744,16 +3748,6 @@
             win.document.close(); 
         }
 
-        function deleteClientByCode(code) {
-            let master = JSON.parse(localStorage.getItem('aqua_pure_master_settings_db') || '{"allowDelete":true}');
-            if(master.allowDelete === false) return alert('⚠️ زر الحذف مغلق.');
-            if(confirm('حذف هذا العميل؟')) { 
-                setDB('aqua_pure_customers_db', getDB('aqua_pure_customers_db').filter(c => String(c.code) !== String(code))); 
-                logUserActivity("العملاء", `حذف كود: ${code}`); 
-                renderAllActive(); 
-            } 
-        }
-
         function getNextCustomerCode() { 
             let clients = getDB('aqua_pure_customers_db'); 
             let maxCode = 100; 
@@ -3767,7 +3761,6 @@
             return (maxCode + 1).toString(); 
         }
         
-        // التعديل 6: إضافة 6 أشهر تلقائياً
         function autoCalculateNextCustomerMaint(val) { 
             if(!val) return; 
             let d = new Date(val); 
@@ -3977,12 +3970,34 @@
         function renderBasicDataTables() { renderBasicTable('regions-tbody', getDB('aqua_pure_regions_db'), 'region'); renderBasicTable('companies-tbody', getDB('aqua_pure_companies_db'), 'company'); renderBasicTable('devices-tbody', getDB('aqua_pure_devices_db'), 'device'); renderBasicTable('reasons-tbody', getDB('aqua_pure_reasons_db'), 'reason'); renderBasicTable('delegates-tbody', getDB('aqua_pure_delegates_db'), 'delegate'); renderBasicTable('coordinators-tbody', getDB('aqua_pure_coordinators_db'), 'coordinator'); }
         function renderBasicTable(tbodyId, arr, type) { let html = ''; arr.forEach((item, idx) => { html += `<tr><td>${item}</td><td style="text-align:center;"><button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteBasicItem('${type}', ${idx})">حذف</button></td></tr>`; }); let el = document.getElementById(tbodyId); if(el) el.innerHTML = html || '<tr><td colspan="2" style="text-align:center;">لا توجد بيانات</td></tr>'; }
         function openBasicModal(type) { document.getElementById('basic-item-type').value = type; document.getElementById('basic-modal-title').innerText = 'إضافة جديدة'; document.getElementById('basic-input-name').value = ''; document.getElementById('basicModal').style.display = 'flex'; }
-        function saveBasicItem(e) { e.preventDefault(); let type = document.getElementById('basic-item-type').value; let val = document.getElementById('basic-input-name').value.trim(); let key = 'aqua_pure_' + type + 's_db'; let arr = getDB(key); if(!arr.includes(val)) arr.push(val); setDB(key, arr); document.getElementById('basicModal').style.display = 'none'; populateDynamicDropdowns(); renderBasicDataTables(); }
-        function deleteBasicItem(type, idx) { let key = 'aqua_pure_' + type + 's_db'; let arr = getDB(key); arr.splice(idx, 1); setDB(key, arr); populateDynamicDropdowns(); renderBasicDataTables(); }
+        
+        // التعديل 3: إصلاح مشكلة حفظ وعرض البيانات في "الشركات الخارجية" (معالجة الجمع company -> companies)
+        function saveBasicItem(e) { 
+            e.preventDefault(); 
+            let type = document.getElementById('basic-item-type').value; 
+            let val = document.getElementById('basic-input-name').value.trim(); 
+            let key = 'aqua_pure_' + type + 's_db'; 
+            if(type === 'company') key = 'aqua_pure_companies_db'; // الحل الجذري للمشكلة
+            let arr = getDB(key); 
+            if(!arr.includes(val)) arr.push(val); 
+            setDB(key, arr); 
+            document.getElementById('basicModal').style.display = 'none'; 
+            populateDynamicDropdowns(); 
+            renderBasicDataTables(); 
+        }
+        
+        function deleteBasicItem(type, idx) { 
+            let key = 'aqua_pure_' + type + 's_db'; 
+            if(type === 'company') key = 'aqua_pure_companies_db'; // الحل الجذري للمشكلة
+            let arr = getDB(key); 
+            arr.splice(idx, 1); 
+            setDB(key, arr); 
+            populateDynamicDropdowns(); 
+            renderBasicDataTables(); 
+        }
 
         function triggerBackup() { let allData = {}; for (let k in dbMap) allData[dbMap[k]] = getDB(k); let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2)); let a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", "PureAqua_Backup_" + new Date().toISOString().split('T')[0] + ".json"); document.body.appendChild(a); a.click(); a.remove(); }
         
-        // التعديل 0: إصلاح زر استرجاع البيانات (Restore Data)
         function restoreFromFile() { 
             let f = document.getElementById('restore-file-input').files[0]; 
             if(!f) return alert('الرجاء اختيار ملف النسخة الاحتياطية (JSON) أولاً.'); 
@@ -3991,9 +4006,7 @@
             r.onload = function(e){ 
                 try { 
                     let parsedData = JSON.parse(e.target.result); 
-                    // رفع البيانات للـ localStorage وقاعدة البيانات السحابية
                     for (let key in parsedData) { 
-                        // البحث عن المفتاح المحلي المطابق للمفتاح في الملف
                         let localKeyToSet = Object.keys(dbMap).find(k => dbMap[k] === key) || key;
                         setDB(localKeyToSet, parsedData[key]); 
                     } 
