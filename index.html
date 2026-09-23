@@ -7670,7 +7670,9 @@ function printExternalStatement() {
             var permanent = readSettings('pure_aqua_company_profile_permanent_v1');
             var basic = readSettings('aqua_pure_sys_settings_db');
             var merged = Object.assign({}, permanent);
-            Object.keys(basic).forEach(function (key) { merged[key] = basic[key]; });
+            Object.keys(basic).forEach(function (key) {
+                if (basic[key] !== undefined && basic[key] !== null && basic[key] !== '') merged[key] = basic[key];
+            });
             return merged;
         }
         function invoiceHeader() {
@@ -7689,9 +7691,7 @@ function printExternalStatement() {
                 return '<span class="pure-aqua-company-detail"><b>' + escapeHtml(item[0]) + ':</b> ' + escapeHtml(item[1]) + '</span>';
             }).join('');
             var logo = text(s.logoBase64) ? '<img class="pure-aqua-company-logo" src="' + escapeHtml(s.logoBase64) + '" alt="شعار الشركة">' : '';
-            var names = (text(s.nameAr) ? '<h1>' + escapeHtml(s.nameAr) + '</h1>' : '') + (text(s.nameEn) ? '<p>' + escapeHtml(s.nameEn) + '</p>' : '');
-            var identity = (logo || names) ? '<div class="pure-aqua-company-identity">' + logo + (names ? '<div>' + names + '</div>' : '') + '</div>' : '';
-            return '<section id="pure-aqua-invoice-settings-header" aria-label="بيانات المؤسسة">' + identity + (details ? '<div class="pure-aqua-company-details">' + details + '</div>' : '') + '</section>';
+            return '<section id="pure-aqua-invoice-settings-header" aria-label="بيانات المؤسسة"><div class="pure-aqua-company-identity">' + logo + '<div><h1>' + escapeHtml(s.nameAr || 'شركة بيور أكوا لأنظمة المياه النقية') + '</h1>' + (text(s.nameEn) ? '<p>' + escapeHtml(s.nameEn) + '</p>' : '') + '</div></div>' + (details ? '<div class="pure-aqua-company-details">' + details + '</div>' : '') + '</section>';
         }
         function isInvoice(markup) {
             return typeof markup === 'string' && (/<title[^>]*>[^<]*فاتورة/i.test(markup) || /فاتورة\s*(ضريبية|تفصيلية|العميل)/i.test(markup));
@@ -7716,173 +7716,6 @@ function printExternalStatement() {
                     return previousWrite.apply(child.document, args);
                 };
                 child.document.__pureAquaInvoiceSettingsWrapped = true;
-            } catch (error) {}
-            return child;
-        };
-    }());
-    </script>
-    <!-- إزالة محصورة: لوحة الفني الميداني ومراقبة الميدان فقط -->
-    <script id="pure-aqua-remove-field-surfaces">
-    (function () {
-        'use strict';
-        var REMOVED_TABS = ['field-tech-dashboard', 'field-monitoring'];
-        var FIELD_FUNCTIONS = [
-            'renderFieldTechDashboard', 'saveFieldZatcaInvoice', 'addFieldZatcaItem', 'calculateFieldZatcaTotal',
-            'fillFieldInvoiceCustomer', 'saveFieldSaleRepair', 'saveFieldMaintenanceRepair', 'saveFieldMaintenanceRepairItem',
-            'addFieldSaleItem', 'addFieldMaintenanceRepairItem', 'printFieldTechnicianReport', 'copyTechnicianFieldLink'
-        ];
-
-        function isRemovedTab(value) { return REMOVED_TABS.indexOf(String(value || '')) !== -1; }
-        function removeFieldSurfaces(root) {
-            var scope = root && root.querySelectorAll ? root : document;
-            scope.querySelectorAll('#field-tech-dashboard, #field-monitoring, #field-monitoring-panel, #field-zatca-invoice-panel').forEach(function (node) { node.remove(); });
-            scope.querySelectorAll('#sidebar-nav-links li[data-target="field-tech-dashboard"], #sidebar-nav-links li[data-target="field-monitoring"]').forEach(function (node) { node.remove(); });
-            scope.querySelectorAll('[onclick*="copyTechnicianFieldLink"], [data-field-tech-link], .field-tech-link').forEach(function (node) { node.remove(); });
-        }
-        function removeTechnicianParameter() {
-            try {
-                var url = new URL(window.location.href);
-                if (!url.searchParams.has('tech')) return;
-                url.searchParams.delete('tech');
-                window.history.replaceState({}, document.title, url.pathname + (url.search || '') + url.hash);
-            } catch (error) {}
-        }
-        function restoreAuthorizedNavigation() {
-            try {
-                var permissions = JSON.parse(localStorage.getItem('current_user_perms') || '[]');
-                if (typeof window.applyPermissions === 'function') window.applyPermissions(Array.isArray(permissions) ? permissions : []);
-            } catch (error) {}
-        }
-
-        removeTechnicianParameter();
-        removeFieldSurfaces(document);
-        FIELD_FUNCTIONS.forEach(function (name) { window[name] = function () { return false; }; });
-
-        var previousSwitchTab = window.switchTab;
-        window.switchTab = function (tabId, element) {
-            if (isRemovedTab(tabId)) return false;
-            return previousSwitchTab ? previousSwitchTab.apply(this, arguments) : false;
-        };
-
-        /* إيقاف استقبال مراقبة الميدان فقط، مع الإبقاء على باقي مزامنة النظام كما هي. */
-        try { if (typeof database !== 'undefined' && database && database.ref) database.ref('fieldMonitoring').off(); } catch (error) {}
-        restoreAuthorizedNavigation();
-
-        var observer = new MutationObserver(function (changes) {
-            changes.forEach(function (change) {
-                if (change.type === 'childList') change.addedNodes.forEach(function (node) { if (node.nodeType === 1) removeFieldSurfaces(node); });
-            });
-            removeFieldSurfaces(document);
-        });
-        observer.observe(document.documentElement, { childList: true, subtree: true });
-    }());
-    </script>
-    <!-- إعدادات الفاتورة: جميع الحقول اختيارية وتنعكس قيمها الفارغة كما هي -->
-    <script id="pure-aqua-optional-company-settings">
-    (function () {
-        'use strict';
-        var SETTINGS_KEY = 'aqua_pure_sys_settings_db';
-        var VAULT_KEY = 'pure_aqua_company_profile_permanent_v1';
-        var FIELDS = [
-            ['sys-name-ar', 'nameAr'], ['sys-name-en', 'nameEn'], ['sys-cr', 'cr'], ['sys-tax', 'tax'],
-            ['sys-unified', 'unifiedNumber'], ['sys-national-id', 'nationalId'], ['sys-city', 'city'],
-            ['sys-street', 'street'], ['sys-building', 'buildingNo'], ['sys-postal', 'postalCode'],
-            ['sys-address', 'address'], ['sys-location', 'locationGps'], ['sys-phone1', 'phone1'],
-            ['sys-phone2', 'phone2'], ['sys-additional-info', 'additionalInfo']
-        ];
-        function read(key) { try { return JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (error) { return {}; } }
-        function makeFieldsOptional() {
-            document.querySelectorAll('#system-settings [required]').forEach(function (input) { input.removeAttribute('required'); });
-            document.querySelectorAll('#system-settings form').forEach(function (form) { form.noValidate = true; });
-        }
-        function saveOptionalSettings(event) {
-            if (event && typeof event.preventDefault === 'function') event.preventDefault();
-            var profile = read(SETTINGS_KEY);
-            FIELDS.forEach(function (pair) {
-                var input = document.getElementById(pair[0]);
-                if (input) profile[pair[1]] = input.value.trim();
-            });
-            var preview = document.getElementById('logo-preview');
-            if (preview && /^data:image\//i.test(preview.src || '')) profile.logoBase64 = preview.src;
-            profile._pureAquaSavedAt = Date.now();
-            /* حفظ القيم الفارغة عمداً: الحقل الممسوح يجب ألا يعود من نسخة أقدم. */
-            localStorage.setItem(SETTINGS_KEY, JSON.stringify(profile));
-            localStorage.setItem(VAULT_KEY, JSON.stringify(profile));
-            if (typeof window.sysSettings !== 'undefined') window.sysSettings = profile;
-            try { if (typeof setDB === 'function') setDB(SETTINGS_KEY, profile); } catch (error) {}
-            try {
-                if (typeof database !== 'undefined' && database && database.ref) {
-                    database.ref('sysSettings').set(profile);
-                    database.ref('companyProfilePermanent').set(profile);
-                }
-            } catch (error) {}
-            if (typeof loadSystemSettingsUI === 'function') loadSystemSettingsUI();
-            try { if (typeof logUserActivity === 'function') logUserActivity('الإعدادات الأساسية', 'تحديث بيانات الشركة والفاتورة'); } catch (error) {}
-            alert('تم حفظ إعدادات الشركة بنجاح!');
-            return false;
-        }
-        /* قالب الفاتورة الأساسي يحتوي اسماً افتراضياً؛ يخفى فقط حين يمسح المستخدم الاسم من الإعدادات. */
-        function isInvoiceMarkup(markup) { return typeof markup === 'string' && /<title[^>]*>[^<]*فاتورة/i.test(markup); }
-        function removeClearedInvoiceValues(markup) {
-            if (!isInvoiceMarkup(markup)) return markup;
-            var profile = read(SETTINGS_KEY);
-            if (!String(profile.nameAr || '').trim()) markup = markup.replace(/<h1>شركة بيور أكوا لأنظمة المياه النقية<\/h1>/g, '');
-            return markup;
-        }
-        var previousOpen = window.open;
-        window.open = function () {
-            var child = previousOpen.apply(this, arguments);
-            try {
-                if (!child || !child.document || child.document.__pureAquaOptionalSettingsWrapped) return child;
-                var previousWrite = child.document.write.bind(child.document);
-                child.document.write = function () {
-                    var args = Array.prototype.slice.call(arguments);
-                    if (typeof args[0] === 'string') args[0] = removeClearedInvoiceValues(args[0]);
-                    return previousWrite.apply(child.document, args);
-                };
-                child.document.__pureAquaOptionalSettingsWrapped = true;
-            } catch (error) {}
-            return child;
-        };
-        makeFieldsOptional();
-        window.saveSystemSettings = saveOptionalSettings;
-        document.addEventListener('DOMContentLoaded', makeFieldsOptional);
-    }());
-    </script>
-    <!-- قاعدة عامة ثابتة: خط Cairo حصرياً في كل مخرجات الطباعة -->
-    <script id="pure-aqua-global-cairo-print-lock">
-    (function () {
-        'use strict';
-        var FONT_URL = 'https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=block';
-        var PRINT_STYLE = '<link rel="stylesheet" href="' + FONT_URL + '"><style id="pure-aqua-cairo-print-lock-style">@media print{html,body,html body *,html body *::before,html body *::after{font-family:\'Cairo\'!important;font-synthesis:none!important}}</style>';
-
-        function installMainPrintRule() {
-            if (document.getElementById('pure-aqua-cairo-main-print-lock')) return;
-            var link = document.createElement('link'); link.rel = 'stylesheet'; link.href = FONT_URL; link.id = 'pure-aqua-cairo-main-font'; document.head.appendChild(link);
-            var style = document.createElement('style'); style.id = 'pure-aqua-cairo-main-print-lock';
-            style.textContent = '@media print{html,body,html body *,html body *::before,html body *::after{font-family:"Cairo"!important;font-synthesis:none!important}}';
-            document.head.appendChild(style);
-        }
-        function lockPrintMarkup(markup) {
-            if (typeof markup !== 'string' || markup.indexOf('pure-aqua-cairo-print-lock-style') !== -1) return markup;
-            if (/<\/head>/i.test(markup)) return markup.replace(/<\/head>/i, PRINT_STYLE + '</head>');
-            if (/<head\b[^>]*>/i.test(markup)) return markup.replace(/<head\b[^>]*>/i, function (tag) { return tag + PRINT_STYLE; });
-            return PRINT_STYLE + markup;
-        }
-        installMainPrintRule();
-
-        var previousOpen = window.open;
-        window.open = function () {
-            var child = previousOpen.apply(this, arguments);
-            try {
-                if (!child || !child.document || child.document.__pureAquaCairoPrintLocked) return child;
-                var previousWrite = child.document.write.bind(child.document);
-                child.document.write = function () {
-                    var args = Array.prototype.slice.call(arguments);
-                    if (typeof args[0] === 'string') args[0] = lockPrintMarkup(args[0]);
-                    return previousWrite.apply(child.document, args);
-                };
-                child.document.__pureAquaCairoPrintLocked = true;
             } catch (error) {}
             return child;
         };
